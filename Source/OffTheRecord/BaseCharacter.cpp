@@ -5,12 +5,19 @@
 
 #include "Camera/CameraComponent.h"
 
+#include "Components/BoxComponent.h"
+
+#include "Engine/SkeletalMeshSocket.h"
+
 #include "GameFramework/PlayerInput.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+#include "BaseWeapon.h"
+
 // Sets default values
-ABaseCharacter::ABaseCharacter()
+ABaseCharacter::ABaseCharacter() : 
+	CharacterState(ECharacterState::ECS_UNARMED), OverlappedWeaponCount(0)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -109,4 +116,65 @@ void ABaseCharacter::LateralMotion(float Value)
 		const FVector Direction{ FRotationMatrix{YawRotation}.GetUnitAxis(EAxis::Y) };
 		AddMovementInput(Direction, Value);
 	}
+}
+
+void ABaseCharacter::DropWeapon()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Drop"));
+	if (EquippedWeapon)
+	{
+		FDetachmentTransformRules DetachmentRules(EDetachmentRule::KeepWorld, true);
+		EquippedWeapon->GetWeaponMesh()->DetachFromComponent(DetachmentRules); //detatch from socket
+
+		EquippedWeapon->DropWeapon();
+		SetCharacterStatus(ECharacterState::ECS_UNARMED);
+	}
+}
+
+void ABaseCharacter::EquipWeapon(ABaseWeapon* Weapon)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Equip"));
+	if (Weapon)
+	{
+		//ignore collisions channels while equipped
+		Weapon->GetPickUpTrigger()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+		const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("Hand_RSocket"));
+		if (HandSocket)
+		{
+			HandSocket->AttachActor(Weapon, GetMesh());
+		}
+		EquippedWeapon = Weapon;
+		if (EquippedWeapon) {
+			EquippedWeapon->SetWeaponStatus(EWeaponStatus::EWS_WEAPONEQUIPPED);
+		}
+	}
+}
+
+void ABaseCharacter::SwapWeapon(ABaseWeapon* Weapon)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Swap"));
+	if (Weapon) {
+		DropWeapon();
+		EquipWeapon(Weapon);
+	}
+}
+
+void ABaseCharacter::OverlapWeaponCounter(int8 Amount)
+{
+	if (OverlappedWeaponCount + Amount <= 0) {
+		OverlappedWeaponCount = 0;
+		bPickUpItem = false;
+	}
+	else
+	{
+		OverlappedWeaponCount += Amount;
+		bPickUpItem = true;
+	}
+
+}
+
+void ABaseCharacter::SetCharacterStatus(ECharacterState Status)
+{
+	CharacterState = Status;
 }

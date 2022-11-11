@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "StatusEnums.h"
 #include "BaseCharacter.generated.h"
 
 UCLASS()
@@ -24,6 +25,9 @@ protected:
 	void ForwardMotion(float Value);
 	void LateralMotion(float Value);
 
+	void DropWeapon();
+	void EquipWeapon(class ABaseWeapon* Weapon);
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* CameraBoom;
@@ -31,11 +35,34 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* FollowCamera;
 
+	//Type of Weapon
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
+		EWeaponType WeaponType;
+
+	//Character Battle Status
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
+		ECharacterState CharacterState;
+
+	//Currently equipped weapon
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		ABaseWeapon* EquippedWeapon;
+
+	//Num of overlapped weapons
+	int8 OverlappedWeaponCount;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void SwapWeapon(ABaseWeapon* Weapon);
+	void OverlapWeaponCounter(int8 Amount);
+
+	bool bPickUpItem = false;
+
+	UFUNCTION(BlueprintCallable)
+		void SetCharacterStatus(ECharacterState Status);
 
 };
