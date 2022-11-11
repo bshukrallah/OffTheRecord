@@ -26,7 +26,11 @@ protected:
 	void LateralMotion(float Value);
 
 	void DropWeapon();
+	void AttackSetup();
+
 	void EquipWeapon(class ABaseWeapon* Weapon);
+
+
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -36,19 +40,28 @@ private:
 		class UCameraComponent* FollowCamera;
 
 	//Type of Weapon
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		EWeaponType WeaponType;
 
 	//Character Battle Status
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		ECharacterState CharacterState;
 
 	//Currently equipped weapon
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		ABaseWeapon* EquippedWeapon;
 
+	//Character Battle Status
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		ECombatState CombatState;
+
 	//Num of overlapped weapons
 	int8 OverlappedWeaponCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		UAnimMontage* AttackMontage;
+
+
 
 public:	
 	// Called every frame
@@ -64,5 +77,16 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void SetCharacterStatus(ECharacterState Status);
+
+	UFUNCTION(BlueprintCallable)
+		void SetCombatState(ECombatState State);
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE ECharacterState GetCharacterStatus() const { return CharacterState; }
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
+
+	void FinishAttack();
 
 };

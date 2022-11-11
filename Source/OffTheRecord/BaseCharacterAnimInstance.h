@@ -2,7 +2,9 @@
 
 #pragma once
 
+
 #include "CoreMinimal.h"
+#include "StatusEnums.h"
 #include "Animation/AnimInstance.h"
 #include "BaseCharacterAnimInstance.generated.h"
 
@@ -21,6 +23,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void UpdateAnimationProperties(float DeltaTime);
 
+	UFUNCTION(BlueprintCallable)
+		void FinishAttack();
+
 private:
 	//Pointer to base character
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
@@ -29,5 +34,10 @@ private:
 	//Variable for character velocity speed
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 		float Speed;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+		ECharacterState CharacterState;
+
+public:
 
 };

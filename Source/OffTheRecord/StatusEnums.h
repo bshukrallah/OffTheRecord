@@ -18,3 +18,16 @@ enum class ECharacterState : uint8
 
 	ECS_MAX UMETA(DisplayName = "DefaultMax")
 };
+
+UENUM(BlueprintType)
+enum class ECombatState : uint8
+{
+	//Ready to attack
+	ECS_READY UMETA(DisplayName = "Unarmed"),
+	//Not allowed to attack
+	ECS_NOTREADY UMETA(DisplayName = "Unarmed"),
+	//Currently attacking
+	ECS_ATTACKING UMETA(DisplayName = "Armed"),
+
+	ECS_MAX UMETA(DisplayName = "DefaultMax")
+};

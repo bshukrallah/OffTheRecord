@@ -17,7 +17,7 @@
 
 // Sets default values
 ABaseCharacter::ABaseCharacter() : 
-	CharacterState(ECharacterState::ECS_UNARMED), OverlappedWeaponCount(0)
+	CharacterState(ECharacterState::ECS_UNARMED), OverlappedWeaponCount(0), CombatState(ECombatState::ECS_NOTREADY)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -48,6 +48,8 @@ void ABaseCharacter::BeginPlay()
 
 }
 
+
+
 // Called every frame
 void ABaseCharacter::Tick(float DeltaTime)
 {
@@ -72,6 +74,9 @@ void ABaseCharacter::SetupControls()
 		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Jump", EKeys::SpaceBar));
 		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Jump", EKeys::Gamepad_FaceButton_Bottom));
 
+		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("AttackSetup", EKeys::LeftMouseButton));
+		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("AttackSetup", EKeys::Gamepad_FaceButton_Left));
+
 		bindingsAdded = true;
 	}
 }
@@ -89,12 +94,17 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+
+	PlayerInputComponent->BindAction("AttackSetup", IE_Pressed, this, &ABaseCharacter::AttackSetup);
+	PlayerInputComponent->BindAction("AttackSetup", IE_Released, this, &ABaseCharacter::AttackSetup);
+
 }
 
 
 //Forward & backward movement
 void ABaseCharacter::ForwardMotion(float Value)
 {
+	if (CombatState == ECombatState::ECS_ATTACKING) { return; }
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		const FRotator Rotation{ Controller->GetControlRotation() };
@@ -108,6 +118,7 @@ void ABaseCharacter::ForwardMotion(float Value)
 //Left & right movement
 void ABaseCharacter::LateralMotion(float Value)
 {
+	if (CombatState == ECombatState::ECS_ATTACKING) { return; }
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		const FRotator Rotation{ Controller->GetControlRotation() };
@@ -128,6 +139,7 @@ void ABaseCharacter::DropWeapon()
 
 		EquippedWeapon->DropWeapon();
 		SetCharacterStatus(ECharacterState::ECS_UNARMED);
+		SetCombatState(ECombatState::ECS_NOTREADY);
 	}
 }
 
@@ -147,6 +159,8 @@ void ABaseCharacter::EquipWeapon(ABaseWeapon* Weapon)
 		EquippedWeapon = Weapon;
 		if (EquippedWeapon) {
 			EquippedWeapon->SetWeaponStatus(EWeaponStatus::EWS_WEAPONEQUIPPED);
+			SetCharacterStatus(ECharacterState::ECS_ARMED);
+			SetCombatState(ECombatState::ECS_READY);
 		}
 	}
 }
@@ -177,4 +191,35 @@ void ABaseCharacter::OverlapWeaponCounter(int8 Amount)
 void ABaseCharacter::SetCharacterStatus(ECharacterState Status)
 {
 	CharacterState = Status;
+}
+
+void ABaseCharacter::SetCombatState(ECombatState State)
+{
+	CombatState = State;
+}
+
+void ABaseCharacter::AttackSetup() 
+{
+	if (CombatState == ECombatState::ECS_ATTACKING) { return; }
+	if (EquippedWeapon && CombatState == ECombatState::ECS_READY) {
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance && AttackMontage)
+		{
+			AnimInstance->Montage_Play(AttackMontage);
+			AnimInstance->Montage_JumpToSection(FName("WeaponSwing"));
+			SetCombatState(ECombatState::ECS_ATTACKING);
+			UE_LOG(LogTemp, Warning, TEXT("ATTACKING"));
+		}
+	}
+	FString StateEnum = StaticEnum<ECharacterState>()->GetValueAsString(CharacterState);
+	FString CombatEnum = StaticEnum<ECombatState>()->GetValueAsString(CombatState);
+	UE_LOG(LogTemp, Warning, TEXT("Character State: %s Combat State: %s"), *StateEnum, *CombatEnum);
+};
+
+void ABaseCharacter::FinishAttack()
+{
+	SetCombatState(ECombatState::ECS_READY);
+	FString StateEnum = StaticEnum<ECharacterState>()->GetValueAsString(CharacterState);
+	FString CombatEnum = StaticEnum<ECombatState>()->GetValueAsString(CombatState);
+	UE_LOG(LogTemp, Warning, TEXT("Character State: %s Combat State: %s"), *StateEnum, *CombatEnum);
 }
