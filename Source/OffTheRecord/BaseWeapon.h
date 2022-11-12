@@ -58,6 +58,8 @@ private:
 
 	float FallingWeaponTime;
 
+	bool bOrientWeapon;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

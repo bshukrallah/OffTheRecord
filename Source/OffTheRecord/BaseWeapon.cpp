@@ -11,7 +11,7 @@
 #include "TimerManager.h"
 
 // Sets default values
-ABaseWeapon::ABaseWeapon() : FallingWeaponTime(2.0f)
+ABaseWeapon::ABaseWeapon() : FallingWeaponTime(1.8f), bOrientWeapon(false)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -94,7 +94,8 @@ void ABaseWeapon::SetWeaponStatus(EWeaponStatus Status)
 	case EWeaponStatus::EWS_WEAPONFALLING:
 		WeaponMesh->SetSimulatePhysics(true);
 		WeaponMesh->SetEnableGravity(true);
-		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
 
 		PickUpTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
@@ -119,7 +120,7 @@ void ABaseWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	if (WeaponStatus == EWeaponStatus::EWS_WEAPONFALLING) {
+	if (bOrientWeapon) {
 		FRotator MeshRotation{ 0.f, GetWeaponMesh()->GetComponentRotation().Yaw, 180.f};
 		GetWeaponMesh()->SetWorldRotation(MeshRotation, false, nullptr, ETeleportType::TeleportPhysics);
 	}
@@ -128,7 +129,7 @@ void ABaseWeapon::Tick(float DeltaTime)
 
 void ABaseWeapon::DropWeapon()
 {
-	SetWeaponStatus(EWeaponStatus::EWS_WEAPONFALLING);
+
 	FRotator MeshRotation{ 0.f, WeaponMesh->GetComponentRotation().Yaw, 0.f };
 	WeaponMesh->SetWorldRotation(MeshRotation, false, nullptr, ETeleportType::TeleportPhysics);
 
@@ -137,27 +138,29 @@ void ABaseWeapon::DropWeapon()
 	//Direction to throw weapon
 	FVector ImpulseDirection = MeshRight.RotateAngleAxis(-20.f, MeshForward);
 
-	float RandomRotation{ 30.f };
-	ImpulseDirection = MeshRight.RotateAngleAxis(RandomRotation, FVector(0.f, 0.f, 1.f));
-	ImpulseDirection *= 5'000.f;
-	WeaponMesh->AddImpulse(ImpulseDirection);
+	ImpulseDirection = MeshRight.RotateAngleAxis(30.f, FVector(0.f, 0.f, 1.f));
+
+	SetWeaponStatus(EWeaponStatus::EWS_WEAPONFALLING);
+	WeaponMesh->AddImpulse(ImpulseDirection*3000);
+
 	
 	FTimerHandle FallingWeaponTimer;
-	GetWorldTimerManager().SetTimer(FallingWeaponTimer, this, &ABaseWeapon::StopFalling, FallingWeaponTime, false);
+	GetWorldTimerManager().SetTimer(FallingWeaponTimer, this, &ABaseWeapon::StopFalling, FallingWeaponTime-.5f, false);
 }
 
 void ABaseWeapon::SpawnWeapon()
 {
-	FVector ImpulseDirection(0.f, 0.f, 1.f);
-	ImpulseDirection *= 5'000.f;
+	FVector ImpulseDirection(0.f, 0.f, 5'000.f);
 	WeaponMesh->AddImpulse(ImpulseDirection);
-
+	bOrientWeapon = true;
 	FTimerHandle FallingWeaponTimer;
 	GetWorldTimerManager().SetTimer(FallingWeaponTimer, this, &ABaseWeapon::StopFalling, FallingWeaponTime, false);
+
 }
 
 void ABaseWeapon::StopFalling()
 {
 	SetWeaponStatus(EWeaponStatus::EWS_WEAPONPICKUP);
+	bOrientWeapon = false;
 }
 
