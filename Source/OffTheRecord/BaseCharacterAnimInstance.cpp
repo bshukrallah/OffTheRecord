@@ -38,3 +38,27 @@ void UBaseCharacterAnimInstance::FinishAttack()
 	}
 }
 
+void UBaseCharacterAnimInstance::ComboHit()
+{
+	if (BaseCharacter == nullptr)
+	{
+		BaseCharacter = Cast<ABaseCharacter>(TryGetPawnOwner());
+	}
+	if (BaseCharacter)
+	{
+		BaseCharacter->ComboHit();
+	}
+}
+
+void UBaseCharacterAnimInstance::ComboMiss()
+{
+	if (BaseCharacter == nullptr)
+	{
+		BaseCharacter = Cast<ABaseCharacter>(TryGetPawnOwner());
+	}
+	if (BaseCharacter)
+	{
+		BaseCharacter->ComboMiss();
+	}
+}
+

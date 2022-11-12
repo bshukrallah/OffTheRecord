@@ -17,7 +17,7 @@
 
 // Sets default values
 ABaseCharacter::ABaseCharacter() : 
-	CharacterState(ECharacterState::ECS_UNARMED), OverlappedWeaponCount(0), CombatState(ECombatState::ECS_NOTREADY)
+	CharacterState(ECharacterState::ECS_UNARMED), OverlappedWeaponCount(0), CombatState(ECombatState::ECS_NOTREADY), ComboState(EComboState::ECS_NOCOMBO)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -104,7 +104,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 //Forward & backward movement
 void ABaseCharacter::ForwardMotion(float Value)
 {
-	if (CombatState == ECombatState::ECS_ATTACKING) { return; }
+	//if (CombatState == ECombatState::ECS_ATTACKING) { return; }
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		const FRotator Rotation{ Controller->GetControlRotation() };
@@ -118,7 +118,7 @@ void ABaseCharacter::ForwardMotion(float Value)
 //Left & right movement
 void ABaseCharacter::LateralMotion(float Value)
 {
-	if (CombatState == ECombatState::ECS_ATTACKING) { return; }
+	//if (CombatState == ECombatState::ECS_ATTACKING) { return; }
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		const FRotator Rotation{ Controller->GetControlRotation() };
@@ -198,28 +198,70 @@ void ABaseCharacter::SetCombatState(ECombatState State)
 	CombatState = State;
 }
 
+void ABaseCharacter::SetComboState(EComboState State)
+{
+	ComboState = State;
+}
+
 void ABaseCharacter::AttackSetup() 
 {
 	if (CombatState == ECombatState::ECS_ATTACKING) { return; }
-	if (EquippedWeapon && CombatState == ECombatState::ECS_READY) {
+
+
+	//First Swing
+	if (EquippedWeapon) {
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance && AttackMontage)
 		{
-			AnimInstance->Montage_Play(AttackMontage);
-			AnimInstance->Montage_JumpToSection(FName("WeaponSwing"));
-			SetCombatState(ECombatState::ECS_ATTACKING);
-			UE_LOG(LogTemp, Warning, TEXT("ATTACKING"));
+			if (CombatState == ECombatState::ECS_READY && ComboState == EComboState::ECS_NOCOMBO) {
+				AnimInstance->Montage_Play(AttackMontage);
+				AnimInstance->Montage_JumpToSection(FName("WeaponSwing"));
+				SetCombatState(ECombatState::ECS_ATTACKING);
+				SetComboState(EComboState::ECS_COMBO0);
+				UE_LOG(LogTemp, Warning, TEXT("Hit 1"));
+			}
+			if (CombatState == ECombatState::ECS_READY && ComboState == EComboState::ECS_COMBO1) {
+				AnimInstance->Montage_Play(AttackMontage);
+				AnimInstance->Montage_JumpToSection(FName("Swing3"));
+				SetCombatState(ECombatState::ECS_ATTACKING);
+				UE_LOG(LogTemp, Warning, TEXT("Hit 2"));
+			}
+			if (CombatState == ECombatState::ECS_READY && ComboState == EComboState::ECS_COMBO2) {
+				AnimInstance->Montage_Play(AttackMontage);
+				AnimInstance->Montage_JumpToSection(FName("WeaponSwing"));
+				SetCombatState(ECombatState::ECS_ATTACKING);
+				UE_LOG(LogTemp, Warning, TEXT("Hit 3"));
+			}
 		}
 	}
-	FString StateEnum = StaticEnum<ECharacterState>()->GetValueAsString(CharacterState);
-	FString CombatEnum = StaticEnum<ECombatState>()->GetValueAsString(CombatState);
-	UE_LOG(LogTemp, Warning, TEXT("Character State: %s Combat State: %s"), *StateEnum, *CombatEnum);
 };
 
 void ABaseCharacter::FinishAttack()
 {
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->Montage_Stop(0.2f);
 	SetCombatState(ECombatState::ECS_READY);
+	SetComboState(EComboState::ECS_NOCOMBO);
 	FString StateEnum = StaticEnum<ECharacterState>()->GetValueAsString(CharacterState);
 	FString CombatEnum = StaticEnum<ECombatState>()->GetValueAsString(CombatState);
 	UE_LOG(LogTemp, Warning, TEXT("Character State: %s Combat State: %s"), *StateEnum, *CombatEnum);
+}
+
+void ABaseCharacter::ComboHit()
+{
+	if (CombatState == ECombatState::ECS_ATTACKING && ComboState == EComboState::ECS_COMBO0)
+	{
+		SetComboState(EComboState::ECS_COMBO1);
+		SetCombatState(ECombatState::ECS_READY);
+	}
+	if (CombatState == ECombatState::ECS_ATTACKING && ComboState == EComboState::ECS_COMBO1)
+	{
+		SetComboState(EComboState::ECS_COMBO2);
+		SetCombatState(ECombatState::ECS_READY);
+	}
+}
+
+void ABaseCharacter::ComboMiss()
+{
+	SetComboState(EComboState::ECS_NOCOMBO);
 }

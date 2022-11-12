@@ -47,6 +47,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		ECharacterState CharacterState;
 
+	//Character Battle Status
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		EComboState ComboState;
+
 	//Currently equipped weapon
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		ABaseWeapon* EquippedWeapon;
@@ -82,11 +86,16 @@ public:
 		void SetCombatState(ECombatState State);
 
 	UFUNCTION(BlueprintCallable)
+		void SetComboState(EComboState State);
+
+	UFUNCTION(BlueprintCallable)
 		FORCEINLINE ECharacterState GetCharacterStatus() const { return CharacterState; }
 
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
 
 	void FinishAttack();
+	void ComboHit();
+	void ComboMiss();
 
 };

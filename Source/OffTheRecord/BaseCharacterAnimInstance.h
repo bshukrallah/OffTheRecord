@@ -26,6 +26,12 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void FinishAttack();
 
+	UFUNCTION(BlueprintCallable)
+		void ComboHit();
+
+	UFUNCTION(BlueprintCallable)
+		void ComboMiss();
+
 private:
 	//Pointer to base character
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
