@@ -2,6 +2,7 @@
 
 
 #include "BaseCharacter.h"
+#include "BaseCharacterAnimInstance.h"
 
 #include "Camera/CameraComponent.h"
 
@@ -12,6 +13,7 @@
 #include "GameFramework/PlayerInput.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+
 
 #include "BaseWeapon.h"
 
@@ -104,7 +106,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 //Forward & backward movement
 void ABaseCharacter::ForwardMotion(float Value)
 {
-	//if (CombatState == ECombatState::ECS_ATTACKING) { return; }
+	//if (ComboState == EComboState::ECS_COMBO2) { return; }
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		const FRotator Rotation{ Controller->GetControlRotation() };
@@ -118,7 +120,7 @@ void ABaseCharacter::ForwardMotion(float Value)
 //Left & right movement
 void ABaseCharacter::LateralMotion(float Value)
 {
-	//if (CombatState == ECombatState::ECS_ATTACKING) { return; }
+	//if (ComboState == EComboState::ECS_COMBO2) { return; }
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		const FRotator Rotation{ Controller->GetControlRotation() };
@@ -131,7 +133,6 @@ void ABaseCharacter::LateralMotion(float Value)
 
 void ABaseCharacter::DropWeapon()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Drop"));
 	if (EquippedWeapon)
 	{
 		FDetachmentTransformRules DetachmentRules(EDetachmentRule::KeepWorld, true);
@@ -145,7 +146,6 @@ void ABaseCharacter::DropWeapon()
 
 void ABaseCharacter::EquipWeapon(ABaseWeapon* Weapon)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Equip"));
 	if (Weapon)
 	{
 		//ignore collisions channels while equipped
@@ -167,7 +167,6 @@ void ABaseCharacter::EquipWeapon(ABaseWeapon* Weapon)
 
 void ABaseCharacter::SwapWeapon(ABaseWeapon* Weapon)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Swap"));
 	if (Weapon) {
 		DropWeapon();
 		EquipWeapon(Weapon);
@@ -191,6 +190,8 @@ void ABaseCharacter::OverlapWeaponCounter(int8 Amount)
 void ABaseCharacter::SetCharacterStatus(ECharacterState Status)
 {
 	CharacterState = Status;
+	UBaseCharacterAnimInstance* AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance) {	AnimInstance->SetCharacterState(CharacterState); }
 }
 
 void ABaseCharacter::SetCombatState(ECombatState State)
@@ -207,30 +208,24 @@ void ABaseCharacter::AttackSetup()
 {
 	if (CombatState == ECombatState::ECS_ATTACKING) { return; }
 
-
-	//First Swing
 	if (EquippedWeapon) {
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		UBaseCharacterAnimInstance* AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 		if (AnimInstance && AttackMontage)
 		{
+			//First Swing
 			if (CombatState == ECombatState::ECS_READY && ComboState == EComboState::ECS_NOCOMBO) {
-				AnimInstance->Montage_Play(AttackMontage);
-				AnimInstance->Montage_JumpToSection(FName("WeaponSwing"));
-				SetCombatState(ECombatState::ECS_ATTACKING);
+				ComboAttack(AnimInstance, "WeaponSwing", 1.5f, 450.f);
 				SetComboState(EComboState::ECS_COMBO0);
-				UE_LOG(LogTemp, Warning, TEXT("Hit 1"));
+
 			}
+			//Second Swing
 			if (CombatState == ECombatState::ECS_READY && ComboState == EComboState::ECS_COMBO1) {
-				AnimInstance->Montage_Play(AttackMontage);
-				AnimInstance->Montage_JumpToSection(FName("Swing3"));
-				SetCombatState(ECombatState::ECS_ATTACKING);
-				UE_LOG(LogTemp, Warning, TEXT("Hit 2"));
+				ComboAttack(AnimInstance, "Swing2", 1.0f, 400.f);
 			}
+			//Third Swing
 			if (CombatState == ECombatState::ECS_READY && ComboState == EComboState::ECS_COMBO2) {
-				AnimInstance->Montage_Play(AttackMontage);
-				AnimInstance->Montage_JumpToSection(FName("WeaponSwing"));
-				SetCombatState(ECombatState::ECS_ATTACKING);
-				UE_LOG(LogTemp, Warning, TEXT("Hit 3"));
+				ComboAttack(AnimInstance, "Swing3", 1.3f, 10.f);
+				AnimInstance->SetComboFinal(true);
 			}
 		}
 	}
@@ -238,17 +233,19 @@ void ABaseCharacter::AttackSetup()
 
 void ABaseCharacter::FinishAttack()
 {
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	AnimInstance->Montage_Stop(0.2f);
+	UBaseCharacterAnimInstance* AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimInstance->Montage_Stop(0.2f, AttackMontage);
+	AnimInstance->SetComboFinal(false);
 	SetCombatState(ECombatState::ECS_READY);
 	SetComboState(EComboState::ECS_NOCOMBO);
-	FString StateEnum = StaticEnum<ECharacterState>()->GetValueAsString(CharacterState);
-	FString CombatEnum = StaticEnum<ECombatState>()->GetValueAsString(CombatState);
-	UE_LOG(LogTemp, Warning, TEXT("Character State: %s Combat State: %s"), *StateEnum, *CombatEnum);
+	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
 }
 
 void ABaseCharacter::ComboHit()
 {
+	//Don't do anything if on final swing
+	if (ComboState == EComboState::ECS_COMBO2) { return; }
+	//If ComboState is Combo0 or Combo1 update accordingly, character must also be attacking
 	if (CombatState == ECombatState::ECS_ATTACKING && ComboState == EComboState::ECS_COMBO0)
 	{
 		SetComboState(EComboState::ECS_COMBO1);
@@ -264,4 +261,12 @@ void ABaseCharacter::ComboHit()
 void ABaseCharacter::ComboMiss()
 {
 	SetComboState(EComboState::ECS_NOCOMBO);
+}
+
+void ABaseCharacter::ComboAttack(UBaseCharacterAnimInstance* AnimInstanceReference, FName MontageSequence, float Speed, float MaxWalkSpeed)
+{
+	AnimInstanceReference->Montage_Play(AttackMontage, Speed);
+	AnimInstanceReference->Montage_JumpToSection(FName(MontageSequence));
+	GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
+	SetCombatState(ECombatState::ECS_ATTACKING);
 }

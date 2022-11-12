@@ -65,8 +65,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		UAnimMontage* AttackMontage;
 
-
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -94,8 +92,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
 
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE EComboState GetComboState() const { return ComboState; }
+
 	void FinishAttack();
 	void ComboHit();
 	void ComboMiss();
+	void ComboAttack(class UBaseCharacterAnimInstance* AnimInstanceReference, FName MontageSequence, float Speed, float MaxWalkSpeed);
 
 };

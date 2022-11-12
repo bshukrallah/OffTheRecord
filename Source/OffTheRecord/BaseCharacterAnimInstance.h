@@ -34,16 +34,28 @@ protected:
 
 private:
 	//Pointer to base character
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Player, meta = (AllowPrivateAccess = "true"))
 		class ABaseCharacter* BaseCharacter;
 
 	//Variable for character velocity speed
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 		float Speed;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PlayerState, meta = (AllowPrivateAccess = "true"))
 		ECharacterState CharacterState;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PlayerState, meta = (AllowPrivateAccess = "true"))
+		EComboState ComboState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PlayerState, meta = (AllowPrivateAccess = "true"))
+		bool bComboFinal;
+
 public:
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE void SetComboFinal(bool final) { bComboFinal = final; }
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE void SetCharacterState(ECharacterState state) { CharacterState = state; }
 
 };
