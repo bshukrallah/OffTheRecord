@@ -253,10 +253,14 @@ void ABaseCharacter::PowerUpWeapon()
 		UE_LOG(LogTemp, Warning, TEXT("PoweringUp! Level: %d"), PowerUpCounter);
 		ComboAttack(AnimInstance, "WeaponSwing", 1.0f, 50.f);
 	}
-	else if (PowerUpCounter > 0)
+	else if (PowerUpCounter > 4)
 	{
 		AnimInstance->SetComboFinal(true);
 		GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+	}
+	else if (PowerUpCounter < 5)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 450.0f;
 	}
 }
 
@@ -274,7 +278,7 @@ void ABaseCharacter::FinishAttack()
 void ABaseCharacter::ComboHit()
 {
 	//Don't do anything if on final swing or if powered up
-	if (ComboState == EComboState::ECS_COMBO2 || PowerUpCounter > 0) { return; }
+	if (ComboState == EComboState::ECS_COMBO2 || PowerUpCounter > 4) { return; }
 
 	//If ComboState is Combo0 or Combo1 update accordingly, character must also be attacking
 	if (CombatState == ECombatState::ECS_ATTACKING && ComboState == EComboState::ECS_COMBO0)
@@ -319,6 +323,6 @@ void ABaseCharacter::PlayWeaponSwingSound()
 		break;
 
 	case EComboState::ECS_COMBO2:
-		PowerUpCounter <1 ? EquippedWeapon->PlayWeaponSwingSound(1) : EquippedWeapon->PlayWeaponSwingSound(2);
+		PowerUpCounter <5 ? EquippedWeapon->PlayWeaponSwingSound(1) : EquippedWeapon->PlayWeaponSwingSound(2);
 	}
 }

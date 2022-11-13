@@ -66,7 +66,7 @@ private:
 		UAnimMontage* AttackMontage;
 
 	bool bAttackButtonHeld;
-	int8 PowerUpCounter;
+	uint8 PowerUpCounter;
 
 public:	
 	// Called every frame
@@ -79,6 +79,9 @@ public:
 	void OverlapWeaponCounter(int8 Amount);
 
 	bool bPickUpItem = false;
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE uint8 GetPowerUpCounter() { return PowerUpCounter; }
 
 	UFUNCTION(BlueprintCallable)
 		void SetCharacterStatus(ECharacterState Status);

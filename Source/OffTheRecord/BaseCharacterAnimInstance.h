@@ -62,7 +62,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE void SetComboFinal(bool final) { bComboFinal = final; }
 
-	FORCEINLINE bool GetComboFinal() { return bComboFinal; }
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE bool GetComboFinal() { return bComboFinal; }
 
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE void SetCharacterState(ECharacterState state) { CharacterState = state; }
