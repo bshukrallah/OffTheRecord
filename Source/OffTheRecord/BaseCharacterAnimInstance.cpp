@@ -63,3 +63,27 @@ void UBaseCharacterAnimInstance::ComboMiss()
 	}
 }
 
+void UBaseCharacterAnimInstance::PowerUpWeapon()
+{
+	if (BaseCharacter == nullptr)
+	{
+		BaseCharacter = Cast<ABaseCharacter>(TryGetPawnOwner());
+	}
+	if (BaseCharacter)
+	{
+		BaseCharacter->PowerUpWeapon();
+	}
+}
+
+void UBaseCharacterAnimInstance::ConfigureWeaponSound()
+{
+	if (BaseCharacter == nullptr)
+	{
+		BaseCharacter = Cast<ABaseCharacter>(TryGetPawnOwner());
+	}
+	if (BaseCharacter)
+	{
+		BaseCharacter->PlayWeaponSwingSound();
+	}
+}
+

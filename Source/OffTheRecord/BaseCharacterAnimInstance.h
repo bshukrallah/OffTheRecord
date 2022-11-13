@@ -32,6 +32,12 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void ComboMiss();
 
+	UFUNCTION(BlueprintCallable)
+		void PowerUpWeapon();
+
+	UFUNCTION(BlueprintCallable)
+		void ConfigureWeaponSound();
+
 private:
 	//Pointer to base character
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Player, meta = (AllowPrivateAccess = "true"))
@@ -52,8 +58,11 @@ private:
 
 public:
 
+	//Used in the animation blueprint to play full body animation for final combo hit
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE void SetComboFinal(bool final) { bComboFinal = final; }
+
+	FORCEINLINE bool GetComboFinal() { return bComboFinal; }
 
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE void SetCharacterState(ECharacterState state) { CharacterState = state; }

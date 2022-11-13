@@ -3,23 +3,29 @@
 
 #include "BaseCharacter.h"
 #include "BaseCharacterAnimInstance.h"
+#include "BaseWeapon.h"
 
 #include "Camera/CameraComponent.h"
 
+#include "Components/AudioComponent.h"
 #include "Components/BoxComponent.h"
 
 #include "Engine/SkeletalMeshSocket.h"
 
 #include "GameFramework/PlayerInput.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
-
-#include "BaseWeapon.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter() : 
-	CharacterState(ECharacterState::ECS_UNARMED), OverlappedWeaponCount(0), CombatState(ECombatState::ECS_NOTREADY), ComboState(EComboState::ECS_NOCOMBO)
+	CharacterState(ECharacterState::ECS_UNARMED), 
+	OverlappedWeaponCount(0), 
+	//Character States
+	CombatState(ECombatState::ECS_NOTREADY), ComboState(EComboState::ECS_NOCOMBO), 
+	//Attack Vars
+	bAttackButtonHeld(false), PowerUpCounter(0)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -49,8 +55,6 @@ void ABaseCharacter::BeginPlay()
 	Super::BeginPlay();
 
 }
-
-
 
 // Called every frame
 void ABaseCharacter::Tick(float DeltaTime)
@@ -98,15 +102,13 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAction("AttackSetup", IE_Pressed, this, &ABaseCharacter::AttackSetup);
-	PlayerInputComponent->BindAction("AttackSetup", IE_Released, this, &ABaseCharacter::AttackSetup);
-
+	PlayerInputComponent->BindAction("AttackSetup", IE_Released, this, &ABaseCharacter::AttackRelease);
 }
 
 
 //Forward & backward movement
 void ABaseCharacter::ForwardMotion(float Value)
 {
-	//if (ComboState == EComboState::ECS_COMBO2) { return; }
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		const FRotator Rotation{ Controller->GetControlRotation() };
@@ -120,7 +122,6 @@ void ABaseCharacter::ForwardMotion(float Value)
 //Left & right movement
 void ABaseCharacter::LateralMotion(float Value)
 {
-	//if (ComboState == EComboState::ECS_COMBO2) { return; }
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		const FRotator Rotation{ Controller->GetControlRotation() };
@@ -184,7 +185,6 @@ void ABaseCharacter::OverlapWeaponCounter(int8 Amount)
 		OverlappedWeaponCount += Amount;
 		bPickUpItem = true;
 	}
-
 }
 
 void ABaseCharacter::SetCharacterStatus(ECharacterState Status)
@@ -204,7 +204,21 @@ void ABaseCharacter::SetComboState(EComboState State)
 	ComboState = State;
 }
 
-void ABaseCharacter::AttackSetup() 
+void ABaseCharacter::AttackSetup()
+{
+	bAttackButtonHeld = true;
+	if (EquippedWeapon && CombatState == ECombatState::ECS_READY)
+	{
+		ComboSetup();
+	}
+}
+
+void ABaseCharacter::AttackRelease()
+{
+	bAttackButtonHeld = false;
+}
+
+void ABaseCharacter::ComboSetup() 
 {
 	if (CombatState == ECombatState::ECS_ATTACKING) { return; }
 
@@ -216,7 +230,6 @@ void ABaseCharacter::AttackSetup()
 			if (CombatState == ECombatState::ECS_READY && ComboState == EComboState::ECS_NOCOMBO) {
 				ComboAttack(AnimInstance, "WeaponSwing", 1.5f, 450.f);
 				SetComboState(EComboState::ECS_COMBO0);
-
 			}
 			//Second Swing
 			if (CombatState == ECombatState::ECS_READY && ComboState == EComboState::ECS_COMBO1) {
@@ -229,7 +242,23 @@ void ABaseCharacter::AttackSetup()
 			}
 		}
 	}
-};
+}
+
+void ABaseCharacter::PowerUpWeapon()
+{
+	UBaseCharacterAnimInstance* AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+	if (bAttackButtonHeld)
+	{
+		PowerUpCounter += 1;
+		UE_LOG(LogTemp, Warning, TEXT("PoweringUp! Level: %d"), PowerUpCounter);
+		ComboAttack(AnimInstance, "WeaponSwing", 1.0f, 50.f);
+	}
+	else if (PowerUpCounter > 0)
+	{
+		AnimInstance->SetComboFinal(true);
+		GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+	}
+}
 
 void ABaseCharacter::FinishAttack()
 {
@@ -239,12 +268,14 @@ void ABaseCharacter::FinishAttack()
 	SetCombatState(ECombatState::ECS_READY);
 	SetComboState(EComboState::ECS_NOCOMBO);
 	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+	PowerUpCounter = 0;
 }
 
 void ABaseCharacter::ComboHit()
 {
-	//Don't do anything if on final swing
-	if (ComboState == EComboState::ECS_COMBO2) { return; }
+	//Don't do anything if on final swing or if powered up
+	if (ComboState == EComboState::ECS_COMBO2 || PowerUpCounter > 0) { return; }
+
 	//If ComboState is Combo0 or Combo1 update accordingly, character must also be attacking
 	if (CombatState == ECombatState::ECS_ATTACKING && ComboState == EComboState::ECS_COMBO0)
 	{
@@ -263,10 +294,31 @@ void ABaseCharacter::ComboMiss()
 	SetComboState(EComboState::ECS_NOCOMBO);
 }
 
-void ABaseCharacter::ComboAttack(UBaseCharacterAnimInstance* AnimInstanceReference, FName MontageSequence, float Speed, float MaxWalkSpeed)
+void ABaseCharacter::ComboAttack(UBaseCharacterAnimInstance* AnimInstanceReference, FName MontageSection, float Speed, float MaxWalkSpeed)
 {
 	AnimInstanceReference->Montage_Play(AttackMontage, Speed);
-	AnimInstanceReference->Montage_JumpToSection(FName(MontageSequence));
+	AnimInstanceReference->Montage_JumpToSection(FName(MontageSection));
 	GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
 	SetCombatState(ECombatState::ECS_ATTACKING);
+}
+
+void ABaseCharacter::PlayWeaponSwingSound()
+{
+	switch (ComboState)
+	{
+	case EComboState::ECS_NOCOMBO:
+		EquippedWeapon->PlayWeaponSwingSound(0);
+		break;
+
+	case EComboState::ECS_COMBO0:
+		EquippedWeapon->PlayWeaponSwingSound(0);
+		break;
+
+	case EComboState::ECS_COMBO1:
+		EquippedWeapon->PlayWeaponSwingSound(0);
+		break;
+
+	case EComboState::ECS_COMBO2:
+		PowerUpCounter <1 ? EquippedWeapon->PlayWeaponSwingSound(1) : EquippedWeapon->PlayWeaponSwingSound(2);
+	}
 }
