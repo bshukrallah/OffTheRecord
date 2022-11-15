@@ -64,7 +64,6 @@ void ABaseWeapon::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 			if(BaseCharacter->bPickUpItem)
 			{
 				BaseCharacter->SwapWeapon(this);
-
 			}
 		}
 	}
