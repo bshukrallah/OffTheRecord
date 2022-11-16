@@ -7,11 +7,11 @@
 
 
 UBaseCharacterAnimInstance::UBaseCharacterAnimInstance() :
-	Speed(0.f)
+	Speed(0.f), bComboFinal(false), CharacterState(ECharacterState::ECS_UNARMED)
 {
 }
 
-void UBaseCharacterAnimInstance::UpdateAnimationProperties(float DeltaTime)
+void UBaseCharacterAnimInstance::UpdateAnimationProperties(float DeltaTime) 
 {
 	if (BaseCharacter == nullptr)
 	{
@@ -22,7 +22,8 @@ void UBaseCharacterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		FVector MovementSpeed(BaseCharacter->GetVelocity());
 		MovementSpeed.Z = 0; //zero out z axis
 		Speed = MovementSpeed.Size();
-		CharacterState = BaseCharacter->GetCharacterStatus();
+		//CharacterState = BaseCharacter->GetCharacterStatus();
+		//BaseCharacter->GetComboState() == EComboState::ECS_COMBO2 ? bComboFinal = true : bComboFinal = false;
 	}
 }
 
@@ -59,6 +60,30 @@ void UBaseCharacterAnimInstance::ComboMiss()
 	if (BaseCharacter)
 	{
 		BaseCharacter->ComboMiss();
+	}
+}
+
+void UBaseCharacterAnimInstance::PowerUpWeapon()
+{
+	if (BaseCharacter == nullptr)
+	{
+		BaseCharacter = Cast<ABaseCharacter>(TryGetPawnOwner());
+	}
+	if (BaseCharacter)
+	{
+		BaseCharacter->PowerUpWeapon();
+	}
+}
+
+void UBaseCharacterAnimInstance::ConfigureWeaponSound()
+{
+	if (BaseCharacter == nullptr)
+	{
+		BaseCharacter = Cast<ABaseCharacter>(TryGetPawnOwner());
+	}
+	if (BaseCharacter)
+	{
+		BaseCharacter->PlayWeaponSwingSound();
 	}
 }
 

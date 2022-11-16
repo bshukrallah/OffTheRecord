@@ -28,10 +28,6 @@ enum class ECombatState : uint8
 	ECS_NOTREADY UMETA(DisplayName = "Not Ready to Attack"),
 	//Currently attacking
 	ECS_ATTACKING UMETA(DisplayName = "Attacking"),
-	//Currently powering up
-	ECS_POWERUP UMETA(DisplayName = "Powering Up"),
-	//Attack following power up
-	ECS_POWERUPATTACK UMETA(DisplayName = "Power Up Attack"),
 
 	ECS_MAX UMETA(DisplayName = "DefaultMax")
 };
@@ -40,9 +36,9 @@ UENUM(BlueprintType)
 enum class EComboState : uint8
 {
 	//Ready to attack
-	ECS_COMBO0 UMETA(DisplayName = "First Strike"),
-	ECS_COMBO1 UMETA(DisplayName = "Combo 1 Available"),
-	ECS_COMBO2 UMETA(DisplayName = "Combo 2 Available"),
+	ECS_COMBO0 UMETA(DisplayName = "Combo 1 Hit"),
+	ECS_COMBO1 UMETA(DisplayName = "Combo 2 Hit"),
+	ECS_COMBO2 UMETA(DisplayName = "Combo 3 Hit"),
 	//Not allowed to attack
 	ECS_NOCOMBO UMETA(DisplayName = "No Combo Available"),
 

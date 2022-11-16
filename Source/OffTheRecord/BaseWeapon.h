@@ -56,6 +56,12 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 		class UBoxComponent* PickUpTrigger;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sound, meta = (AllowPrivateAccess = "true"))
+		class UAudioComponent* WeaponSwingAC;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound, meta = (AllowPrivateAccess = "true"))
+		class USoundCue* WeaponSwingCue;
+
 	float FallingWeaponTime;
 
 	bool bOrientWeapon;
@@ -66,6 +72,8 @@ public:
 
 	void DropWeapon(); //Adds impulse to weapon when dropped
 	void SpawnWeapon(); //Adds impulse to weapon when spawned
+
+	void PlayWeaponSwingSound(int8 type); //Adds impulse to weapon when spawned
 
 	FORCEINLINE UBoxComponent* GetPickUpTrigger() const { return PickUpTrigger; }
 	FORCEINLINE EWeaponStatus GetWeaponStatus() const { return WeaponStatus; }

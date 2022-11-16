@@ -1,14 +1,16 @@
 // Off The Record - Game Off 2022 Game Jam (Marcus Peck & Ben Shukrallah)
 
 #include "BaseWeapon.h"
+
+#include "BaseCharacter.h"
+#include "Sound/SoundCue.h"
+#include "TimerManager.h"
+
+#include "Components/AudioComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/StaticMeshComponent.h"
-
-
-#include "BaseCharacter.h"
-#include "TimerManager.h"
 
 // Sets default values
 ABaseWeapon::ABaseWeapon() : FallingWeaponTime(1.8f), bOrientWeapon(false)
@@ -19,9 +21,15 @@ ABaseWeapon::ABaseWeapon() : FallingWeaponTime(1.8f), bOrientWeapon(false)
 	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Weapon Mesh"));
 	SetRootComponent(WeaponMesh);
 
+	//Trigger for picking up the weapon
 	PickUpTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Pick Up Trigger"));
 	PickUpTrigger->SetupAttachment(GetRootComponent());
 
+	//Audio
+	WeaponSwingAC = CreateDefaultSubobject<UAudioComponent>(TEXT("Weapon Swing Sound"));
+	WeaponSwingAC->bAutoActivate = false;
+	WeaponSwingAC->SetupAttachment(GetRootComponent());
+	WeaponSwingAC->SetRelativeLocation(FVector(30.f, 0.0f, 0.0f));
 }
 
 // Called when the game starts or when spawned
@@ -29,17 +37,19 @@ void ABaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-
 	SetWeaponStatus(EWeaponStatus::EWS_WEAPONFALLING);
 	if (WeaponStatus == EWeaponStatus::EWS_WEAPONFALLING)
 	{
 		SpawnWeapon();
 	}
 
+	if (WeaponSwingAC && WeaponSwingCue) 
+	{
+		WeaponSwingAC->SetSound(WeaponSwingCue);
+	}
+
 	PickUpTrigger->OnComponentBeginOverlap.AddDynamic(this, &ABaseWeapon::OnOverlap);
 	PickUpTrigger->OnComponentEndOverlap.AddDynamic(this, &ABaseWeapon::OnEndOverlap);
-
-
 }
 
 void ABaseWeapon::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -156,6 +166,12 @@ void ABaseWeapon::SpawnWeapon()
 	FTimerHandle FallingWeaponTimer;
 	GetWorldTimerManager().SetTimer(FallingWeaponTimer, this, &ABaseWeapon::StopFalling, FallingWeaponTime, false);
 
+}
+
+void ABaseWeapon::PlayWeaponSwingSound(int8 type)
+{
+	WeaponSwingAC->SetIntParameter("WeaponSwingType", type);
+	WeaponSwingAC->Play();
 }
 
 void ABaseWeapon::StopFalling()

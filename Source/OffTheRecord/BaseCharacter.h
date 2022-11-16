@@ -25,12 +25,12 @@ protected:
 	void ForwardMotion(float Value);
 	void LateralMotion(float Value);
 
-	void DropWeapon();
 	void AttackSetup();
+	void AttackRelease();
+	void ComboSetup();
 
+	void DropWeapon();
 	void EquipWeapon(class ABaseWeapon* Weapon);
-
-
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -65,7 +65,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		UAnimMontage* AttackMontage;
 
-
+	bool bAttackButtonHeld;
+	uint8 PowerUpCounter;
 
 public:	
 	// Called every frame
@@ -78,6 +79,9 @@ public:
 	void OverlapWeaponCounter(int8 Amount);
 
 	bool bPickUpItem = false;
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE uint8 GetPowerUpCounter() { return PowerUpCounter; }
 
 	UFUNCTION(BlueprintCallable)
 		void SetCharacterStatus(ECharacterState Status);
@@ -94,8 +98,19 @@ public:
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
 
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE EComboState GetComboState() const { return ComboState; }
+
+	//Public Weapon functions called from anim instance
+	void PowerUpWeapon();
 	void FinishAttack();
 	void ComboHit();
 	void ComboMiss();
+
+	void ComboAttack(class UBaseCharacterAnimInstance* AnimInstanceReference, FName MontageSection, float Speed, float MaxWalkSpeed);
+
+	//Weapon Audio
+
+	void PlayWeaponSwingSound();
 
 };
