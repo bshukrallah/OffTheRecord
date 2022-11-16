@@ -39,7 +39,7 @@ void UAttackTriggerComponent::DisableCollision()
 
 void UAttackTriggerComponent::EnableCollision()
 {
-	this->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	this->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	this->SetCollisionResponseToAllChannels(ECR_Overlap);
 	this->SetVisibility(true);
 	this->ShapeColor = FColor(0, 255, 0, 1);

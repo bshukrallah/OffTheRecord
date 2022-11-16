@@ -2,13 +2,14 @@
 
 #include "BaseWeapon.h"
 
+#include "AttackTriggerComponent.h"
 #include "BaseCharacter.h"
+
 #include "Sound/SoundCue.h"
 #include "TimerManager.h"
 
 #include "Components/AudioComponent.h"
 #include "Components/BoxComponent.h"
-#include "Components/CapsuleComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/StaticMeshComponent.h"
 
@@ -24,6 +25,10 @@ ABaseWeapon::ABaseWeapon() : FallingWeaponTime(1.8f), bOrientWeapon(false)
 	//Trigger for picking up the weapon
 	PickUpTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Pick Up Trigger"));
 	PickUpTrigger->SetupAttachment(GetRootComponent());
+
+	//Trigger for Attacking
+	AttackBox = CreateDefaultSubobject<UAttackTriggerComponent>(TEXT("Attack Trigger Box"));
+	AttackBox->SetupAttachment(GetRootComponent());
 
 	//Audio
 	WeaponSwingAC = CreateDefaultSubobject<UAudioComponent>(TEXT("Weapon Swing Sound"));
@@ -98,6 +103,8 @@ void ABaseWeapon::SetWeaponStatus(EWeaponStatus Status)
 		PickUpTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 		PickUpTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
+		AttackBox->DisableCollision();
+
 		break;
 
 	case EWeaponStatus::EWS_WEAPONFALLING:
@@ -110,6 +117,8 @@ void ABaseWeapon::SetWeaponStatus(EWeaponStatus Status)
 		PickUpTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		PickUpTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+		AttackBox->DisableCollision();
+
 		break;
 
 	case EWeaponStatus::EWS_WEAPONEQUIPPED:
@@ -121,6 +130,8 @@ void ABaseWeapon::SetWeaponStatus(EWeaponStatus Status)
 		PickUpTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		PickUpTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	
+		AttackBox->EnableCollision();
+
 	}
 }
 

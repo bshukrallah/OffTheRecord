@@ -56,6 +56,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 		class UBoxComponent* PickUpTrigger;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+		class UAttackTriggerComponent* AttackBox;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sound, meta = (AllowPrivateAccess = "true"))
 		class UAudioComponent* WeaponSwingAC;
 

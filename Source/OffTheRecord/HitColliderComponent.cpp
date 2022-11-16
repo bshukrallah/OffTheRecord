@@ -16,7 +16,7 @@ void UHitColliderComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	DisableCollision();
+	EnableCollision();
 
 	if (this->GetOwner()->GetClass()->IsChildOf(ABaseCharacter::StaticClass()))
 	{
@@ -46,7 +46,29 @@ void UHitColliderComponent::BeginPlay()
 
 void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	this->ShapeColor = FColor(255, 0, 0, 1);
+	if (BaseEnemy) {
+		UE_LOG(LogTemp, Warning, TEXT("Enemy Hit"));
+		if (OtherActor->GetClass()->IsChildOf(ABaseWeapon::StaticClass())) {
+			UE_LOG(LogTemp, Warning, TEXT("Collide with Weapon"));
+			FVector LaunchDirection((OtherActor->GetActorLocation() - BaseEnemy->GetActorLocation()).GetSafeNormal()*-1);
+			BaseEnemy->LaunchCharacter(FVector(LaunchDirection.X*500, LaunchDirection.Y*500, 200), false, false);
+
+		}
+	}
+	if (EquippedWeapon) {
+		UE_LOG(LogTemp, Warning, TEXT("Weapon Hit"));
+	}
+	if (BaseCharacter) {
+		UE_LOG(LogTemp, Warning, TEXT("Character Hit"));
+	}
+	UE_LOG(LogTemp, Warning, TEXT("This Object: %s --- Collision with: %s"), *FString(OverlappedComponent->GetName()), * FString(OtherComp->GetName()));
+	if (OtherActor->GetClass()->IsChildOf(ABaseEnemy::StaticClass())) {
+		UE_LOG(LogTemp, Warning, TEXT("Collide with Base Enemy"));
+	}
+	if (OtherActor->GetClass()->IsChildOf(ABaseCharacter::StaticClass())) {
+		UE_LOG(LogTemp, Warning, TEXT("Collide with Base Character"));
+	}
+
 }
 
 void UHitColliderComponent::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -59,16 +81,15 @@ void UHitColliderComponent::DisableCollision()
 	this->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	this->SetCollisionResponseToAllChannels(ECR_Ignore);
 	this->SetVisibility(true);
-	this->bHiddenInGame(false);
 	this->ShapeColor.Green;
 	bCollisionEnabled = false;
 }
 
 void UHitColliderComponent::EnableCollision()
 {
-	this->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	this->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	this->SetCollisionResponseToAllChannels(ECR_Overlap);
 	this->SetVisibility(true);
-	this->ShapeColor = FColor(0, 255, 0, 1);
+	this->ShapeColor.Blue;
 	bCollisionEnabled = true;
 }

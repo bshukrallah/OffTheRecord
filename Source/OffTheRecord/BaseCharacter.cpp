@@ -53,7 +53,6 @@ ABaseCharacter::ABaseCharacter() :
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 // Called every frame

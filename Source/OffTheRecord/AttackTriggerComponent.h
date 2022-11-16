@@ -27,14 +27,13 @@ protected:
 		void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 private:
-	UFUNCTION(BlueprintCallable, Category = "Collision Settings", meta = (AllowPrivateAccess = "true"))
-		void DisableCollision();
-
-	UFUNCTION(BlueprintCallable, Category = "Collision Settings", meta = (AllowPrivateAccess = "true"))
-		void EnableCollision();
-
 	bool bCollisionEnabled;
 
 public:
+	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+		void DisableCollision();
+
+	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+		void EnableCollision();
 	
 };
