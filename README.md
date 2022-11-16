@@ -1,6 +1,8 @@
 # Off The Record
 Game Off 2022
 
+Collaberation between Marcus Peck & Ben Shukrallah
+
 This project is primarily written in C++ utilizing UE5 5.03.
 Follow these directions to load the files in Unreal Engine
 
