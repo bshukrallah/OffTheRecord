@@ -122,16 +122,14 @@ void ABaseWeapon::SetWeaponStatus(EWeaponStatus Status)
 		break;
 
 	case EWeaponStatus::EWS_WEAPONEQUIPPED:
+		AttackBox->EnableCollision();
 		WeaponMesh->SetSimulatePhysics(false);
 		WeaponMesh->SetEnableGravity(false);
 		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 		PickUpTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-		PickUpTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	
-		AttackBox->EnableCollision();
-
+		PickUpTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 

@@ -250,7 +250,7 @@ void ABaseCharacter::PowerUpWeapon()
 	{
 		PowerUpCounter += 1;
 		UE_LOG(LogTemp, Warning, TEXT("PoweringUp! Level: %d"), PowerUpCounter);
-		ComboAttack(AnimInstance, "WeaponSwing", 1.0f, 50.f);
+		ComboAttack(AnimInstance, "WeaponSwing", 1.0f, 100.f);
 	}
 	else if (PowerUpCounter > 4)
 	{
