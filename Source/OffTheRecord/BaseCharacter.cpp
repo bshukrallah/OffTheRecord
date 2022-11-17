@@ -25,7 +25,7 @@ ABaseCharacter::ABaseCharacter() :
 	//Character States
 	CombatState(ECombatState::ECS_NOTREADY), ComboState(EComboState::ECS_NOCOMBO), 
 	//Attack Vars
-	bAttackButtonHeld(false), PowerUpCounter(0)
+	bAttackButtonHeld(false), PowerUpCounter(100)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -246,20 +246,26 @@ void ABaseCharacter::ComboSetup()
 void ABaseCharacter::PowerUpWeapon()
 {
 	UBaseCharacterAnimInstance* AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+	if (!EquippedWeapon) { return; }
 	if (bAttackButtonHeld)
 	{
-		PowerUpCounter += 1;
-		UE_LOG(LogTemp, Warning, TEXT("PoweringUp! Level: %d"), PowerUpCounter);
+		if (PowerUpCounter == 450) 
+		{ PowerUpCounter = 450; }
+		else {
+			PowerUpCounter += 25;
+		}
 		ComboAttack(AnimInstance, "WeaponSwing", 1.0f, 100.f);
 	}
-	else if (PowerUpCounter > 4)
+	else if (PowerUpCounter > 201)
 	{
 		AnimInstance->SetComboFinal(true);
 		GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+		EquippedWeapon->SetPowerLevel(PowerUpCounter);
 	}
-	else if (PowerUpCounter < 5)
+	else if (PowerUpCounter < 200)
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 450.0f;
+		EquippedWeapon->SetPowerLevel(PowerUpCounter);
 	}
 }
 
@@ -271,13 +277,17 @@ void ABaseCharacter::FinishAttack()
 	SetCombatState(ECombatState::ECS_READY);
 	SetComboState(EComboState::ECS_NOCOMBO);
 	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
-	PowerUpCounter = 0;
+	PowerUpCounter = 100;
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->SetPowerLevel(100);
+	}
 }
 
 void ABaseCharacter::ComboHit()
 {
 	//Don't do anything if on final swing or if powered up
-	if (ComboState == EComboState::ECS_COMBO2 || PowerUpCounter > 4) { return; }
+	if (ComboState == EComboState::ECS_COMBO2 || PowerUpCounter > 201) { return; }
 
 	//If ComboState is Combo0 or Combo1 update accordingly, character must also be attacking
 	if (CombatState == ECombatState::ECS_ATTACKING && ComboState == EComboState::ECS_COMBO0)
@@ -319,9 +329,10 @@ void ABaseCharacter::PlayWeaponSwingSound()
 
 	case EComboState::ECS_COMBO1:
 		EquippedWeapon->PlayWeaponSwingSound(0);
+		EquippedWeapon->SetPowerLevel(350);
 		break;
 
 	case EComboState::ECS_COMBO2:
-		PowerUpCounter <5 ? EquippedWeapon->PlayWeaponSwingSound(1) : EquippedWeapon->PlayWeaponSwingSound(2);
+		PowerUpCounter < 201 ? EquippedWeapon->PlayWeaponSwingSound(1) : EquippedWeapon->PlayWeaponSwingSound(2);
 	}
 }

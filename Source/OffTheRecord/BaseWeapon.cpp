@@ -14,7 +14,7 @@
 #include "Components/StaticMeshComponent.h"
 
 // Sets default values
-ABaseWeapon::ABaseWeapon() : FallingWeaponTime(1.8f), bOrientWeapon(false)
+ABaseWeapon::ABaseWeapon() : FallingWeaponTime(1.8f), bOrientWeapon(false), PowerUpLevel(100)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/BoxComponent.h"
+#include "StatusEnums.h"
 #include "HitColliderComponent.generated.h"
 
 /**
@@ -28,29 +29,46 @@ protected:
 		void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 private:
-	UFUNCTION(BlueprintCallable, Category = "Collision Settings", meta = (AllowPrivateAccess = "true"))
-		void DisableCollision();
-
-	UFUNCTION(BlueprintCallable, Category = "Collision Settings", meta = (AllowPrivateAccess = "true"))
-		void EnableCollision();
-
 	bool bCollisionEnabled;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component Owner", meta = (AllowPrivateAccess = "true"))
 		class ABaseWeapon* EquippedWeapon;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component Owner", meta = (AllowPrivateAccess = "true"))
+		class ABaseWeapon* EquippedWeaponOwner;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component Owner", meta = (AllowPrivateAccess = "true"))
 		class ABaseCharacter* BaseCharacter;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component Owner", meta = (AllowPrivateAccess = "true"))
+		class ABaseCharacter* BaseCharacterOwner;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component Owner", meta = (AllowPrivateAccess = "true"))
 		class ABaseEnemy* BaseEnemy;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component Owner", meta = (AllowPrivateAccess = "true"))
+		class ABaseEnemy* BaseEnemyOwner;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component Owner", meta = (AllowPrivateAccess = "true"))
 		FString ComponentOwner;
 
+	//Hit Collider Type
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		EBoxTypes HitBoxType;
+
 public:
+	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+		void DisableCollision();
+
+	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+		void EnableCollision();
+
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE FString GetColliderOwner() { return ComponentOwner; }
 
-	
+	UFUNCTION(BlueprintCallable)
+		void SetType(EBoxTypes NewHitBoxTypes);
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE EBoxTypes GetType() { return HitBoxType; }
 };

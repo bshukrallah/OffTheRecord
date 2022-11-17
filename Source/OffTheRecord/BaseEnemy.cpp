@@ -2,23 +2,27 @@
 
 
 #include "BaseEnemy.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "HitColliderComponent.h"
+#include "BaseEnemyAnimInstance.h"
 
 // Sets default values
-ABaseEnemy::ABaseEnemy()
+ABaseEnemy::ABaseEnemy() : HitState(EHitState::EHS_NORMAL)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	FrontHitBox = CreateDefaultSubobject<UHitColliderComponent>(TEXT("Front Hit Box"));
 	FrontHitBox->SetupAttachment(GetRootComponent());
+	FrontHitBox->SetType(EBoxTypes::EBT_FRONT);
 
 	BackHitBox = CreateDefaultSubobject<UHitColliderComponent>(TEXT("Back Hit Box"));
 	BackHitBox->SetupAttachment(GetRootComponent());
+	BackHitBox->SetType(EBoxTypes::EBT_BACK);
 
 	TopHitBox = CreateDefaultSubobject<UHitColliderComponent>(TEXT("Top Hit Box"));
 	TopHitBox->SetupAttachment(GetRootComponent());
-
+	TopHitBox->SetType(EBoxTypes::EBT_TOP);
 }
 
 // Called when the game starts or when spawned
@@ -27,6 +31,7 @@ void ABaseEnemy::BeginPlay()
 	Super::BeginPlay();
 
 }
+
 
 // Called every frame
 void ABaseEnemy::Tick(float DeltaTime)
@@ -42,3 +47,41 @@ void ABaseEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 }
 
+void ABaseEnemy::KnockBack(FVector ForceDirection, int32 PowerLvl)
+{
+	LaunchCharacter(FVector(ForceDirection.X * (PowerLvl*2), ForceDirection.Y * (PowerLvl*20), 200), false, false);
+	HitState = EHitState::EHS_FALLBACK;
+	DisableHitBoxes();
+	UBaseEnemyAnimInstance* AnimInstance = Cast<UBaseEnemyAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance) {
+		AnimInstance->Montage_Play(FallingMontage, 1.0);
+		AnimInstance->Montage_JumpToSection(FName("FallBack"));
+	}
+
+}
+
+void ABaseEnemy::KnockForward(FVector ForceDirection, int32 PowerLvl)
+{
+	LaunchCharacter(FVector(ForceDirection.X * PowerLvl, ForceDirection.Y * PowerLvl, 200), false, false);
+	HitState = EHitState::EHS_FALLFORWARD;
+	DisableHitBoxes();
+}
+
+void ABaseEnemy::KnockDown()
+{
+	UE_LOG(LogTemp, Warning, TEXT("KNOCK DOWN"));
+}
+
+void ABaseEnemy::DisableHitBoxes()
+{
+	FrontHitBox->DisableCollision();
+	BackHitBox->DisableCollision();
+	TopHitBox->DisableCollision();
+}
+
+void ABaseEnemy::EnableHitBoxes()
+{
+	FrontHitBox->EnableCollision();
+	BackHitBox->EnableCollision();
+	TopHitBox->EnableCollision();
+}

@@ -68,6 +68,7 @@ private:
 	float FallingWeaponTime;
 
 	bool bOrientWeapon;
+	int32 PowerUpLevel;
 
 public:	
 	// Called every frame
@@ -84,6 +85,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Items, meta = (AllowPrivateAccess = "true"))
 		void SetWeaponStatus(EWeaponStatus Status);
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE int32 GetPowerLevel() { return PowerUpLevel; }
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE void SetPowerLevel(int32 PowerLevel) { PowerUpLevel = PowerLevel; }
 
 
 };

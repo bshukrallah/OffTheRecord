@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/BoxComponent.h"
+#include "StatusEnums.h"
 #include "AttackTriggerComponent.generated.h"
 
 /**

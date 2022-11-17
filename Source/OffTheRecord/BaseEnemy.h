@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "StatusEnums.h"
 #include "BaseEnemy.generated.h"
 
 UCLASS()
@@ -29,11 +30,33 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		class UHitColliderComponent* TopHitBox;
 
+	//Character Hit Status
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		EHitState HitState;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		UAnimMontage* FallingMontage;
+
+	void DisableHitBoxes();
+	void EnableHitBoxes();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+		void KnockBack(FVector ForceDirection, int32 PowerLvl);
+
+	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+		void KnockForward(FVector ForceDirection, int32 PowerLvl);
+
+	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+		void KnockDown();
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE EHitState GetHitState() const { return HitState; }
 
 };

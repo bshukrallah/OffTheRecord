@@ -66,7 +66,7 @@ private:
 		UAnimMontage* AttackMontage;
 
 	bool bAttackButtonHeld;
-	uint8 PowerUpCounter;
+	int32 PowerUpCounter;
 
 public:	
 	// Called every frame
@@ -81,7 +81,7 @@ public:
 	bool bPickUpItem = false;
 
 	UFUNCTION(BlueprintCallable)
-		FORCEINLINE uint8 GetPowerUpCounter() { return PowerUpCounter; }
+		FORCEINLINE int32 GetPowerUpCounter() { return PowerUpCounter; }
 
 	UFUNCTION(BlueprintCallable)
 		void SetCharacterStatus(ECharacterState Status);

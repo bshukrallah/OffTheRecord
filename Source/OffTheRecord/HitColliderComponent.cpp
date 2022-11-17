@@ -7,7 +7,7 @@
 #include "BaseEnemy.h"
 #include "BaseWeapon.h"
 
-UHitColliderComponent::UHitColliderComponent() : bCollisionEnabled(false)
+UHitColliderComponent::UHitColliderComponent() : bCollisionEnabled(false), HitBoxType(EBoxTypes::EBT_DEFAULT)
 {
 
 }
@@ -20,20 +20,20 @@ void UHitColliderComponent::BeginPlay()
 
 	if (this->GetOwner()->GetClass()->IsChildOf(ABaseCharacter::StaticClass()))
 	{
-		BaseCharacter = Cast<ABaseCharacter>(this->GetOwner());
-		ComponentOwner = FString(BaseCharacter->GetName());
+		BaseCharacterOwner = Cast<ABaseCharacter>(this->GetOwner());
+		ComponentOwner = FString(BaseCharacterOwner->GetName());
 	}
 
 	if (this->GetOwner()->GetClass()->IsChildOf(ABaseWeapon::StaticClass()))
 	{
-		EquippedWeapon = Cast<ABaseWeapon>(this->GetOwner());
-		ComponentOwner = FString(EquippedWeapon->GetName());
+		EquippedWeaponOwner = Cast<ABaseWeapon>(this->GetOwner());
+		ComponentOwner = FString(EquippedWeaponOwner->GetName());
 	}
 
 	if (this->GetOwner()->GetClass()->IsChildOf(ABaseEnemy::StaticClass()))
 	{
-		BaseEnemy = Cast<ABaseEnemy>(this->GetOwner());
-		ComponentOwner = FString(BaseEnemy->GetName());
+		BaseEnemyOwner = Cast<ABaseEnemy>(this->GetOwner());
+		ComponentOwner = FString(BaseEnemyOwner->GetName());
 	}
 
 	if (ComponentOwner.Len() > 0) {
@@ -46,15 +46,81 @@ void UHitColliderComponent::BeginPlay()
 
 void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (BaseEnemy) {
-		UE_LOG(LogTemp, Warning, TEXT("Enemy Hit"));
-		if (OtherActor->GetClass()->IsChildOf(ABaseWeapon::StaticClass())) {
-			UE_LOG(LogTemp, Warning, TEXT("Collide with Weapon"));
-			FVector LaunchDirection((OtherActor->GetActorLocation() - BaseEnemy->GetActorLocation()).GetSafeNormal()*-1);
-			BaseEnemy->LaunchCharacter(FVector(LaunchDirection.X*500, LaunchDirection.Y*500, 200), false, false);
+	if (OtherActor->GetClass()->IsChildOf(ABaseWeapon::StaticClass()))
+	{
+		EquippedWeapon = Cast<ABaseWeapon>(OtherComp->GetOwner());
+		if (EquippedWeapon) {
+			int32 WeaponPower = EquippedWeapon->GetPowerLevel();
+			UE_LOG(LogTemp, Warning, TEXT("Weapon Power: %d"), WeaponPower);
 
+			FVector LaunchDirection((OtherActor->GetActorLocation() - this->GetOwner()->GetActorLocation()).GetSafeNormal() * -1);
+
+			if (HitBoxType == EBoxTypes::EBT_FRONT)
+			{
+				if (BaseEnemyOwner)
+				{
+					BaseEnemyOwner->KnockBack(LaunchDirection, WeaponPower);
+				}
+				if (BaseCharacterOwner)
+				{
+					return;
+				}
+			}
+			if (HitBoxType == EBoxTypes::EBT_BACK)
+			{
+				if (BaseEnemyOwner)
+				{
+					BaseEnemyOwner->KnockForward(LaunchDirection, WeaponPower);
+				}
+				if (BaseCharacterOwner)
+				{
+					return;
+				}
+			}
 		}
 	}
+
+	if (OtherActor->GetClass()->IsChildOf(ABaseCharacter::StaticClass()))  {
+		BaseCharacter = Cast<ABaseCharacter>(OtherComp->GetOwner());
+		if (BaseCharacter)
+		{
+			if (HitBoxType == EBoxTypes::EBT_TOP)
+			{
+				if (BaseEnemyOwner)
+				{
+					BaseEnemyOwner->KnockDown();
+				}
+				if (BaseCharacterOwner)
+				{
+					return;
+				}
+			}
+		}
+	}
+
+	if (OtherActor->GetClass()->IsChildOf(ABaseEnemy::StaticClass())) {
+		BaseEnemy = Cast<ABaseEnemy>(OtherComp->GetOwner());
+		if (BaseCharacter)
+		{
+			if (HitBoxType == EBoxTypes::EBT_FRONT)
+			{
+				if (BaseCharacterOwner)
+				{
+					return;
+				}
+			}
+			if (HitBoxType == EBoxTypes::EBT_BACK)
+			{
+				if (BaseCharacterOwner)
+				{
+					return;
+				}
+			}
+		}
+	}
+	
+
+	//Temp Logging
 	if (EquippedWeapon) {
 		UE_LOG(LogTemp, Warning, TEXT("Weapon Hit"));
 	}
@@ -92,4 +158,9 @@ void UHitColliderComponent::EnableCollision()
 	this->SetVisibility(true);
 	this->ShapeColor.Blue;
 	bCollisionEnabled = true;
+}
+
+void UHitColliderComponent::SetType(EBoxTypes NewHitState)
+{
+	HitBoxType = NewHitState;
 }
