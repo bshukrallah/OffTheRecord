@@ -37,9 +37,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		UAnimMontage* FallingMontage;
 
-	void DisableHitBoxes();
-	void EnableHitBoxes();
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -51,6 +48,12 @@ public:
 		void KnockBack(FVector ForceDirection, int32 PowerLvl);
 
 	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+		void BackGetUp();
+
+	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+		void FrontGetUp();
+
+	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
 		void KnockForward(FVector ForceDirection, int32 PowerLvl);
 
 	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
@@ -58,5 +61,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE EHitState GetHitState() const { return HitState; }
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE void SetHitState(EHitState 
+			eHitState) { HitState = eHitState; }
+
+	void DisableHitBoxes();
+	void EnableHitBoxes();
 
 };

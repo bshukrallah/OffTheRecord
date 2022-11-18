@@ -92,5 +92,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE void SetPowerLevel(int32 PowerLevel) { PowerUpLevel = PowerLevel; }
 
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE UAttackTriggerComponent* GetAttackBox() { return AttackBox; }
 
 };

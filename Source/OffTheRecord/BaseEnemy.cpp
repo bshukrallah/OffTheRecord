@@ -60,16 +60,49 @@ void ABaseEnemy::KnockBack(FVector ForceDirection, int32 PowerLvl)
 
 }
 
+void ABaseEnemy::BackGetUp()
+{
+	HitState = EHitState::EHS_GETTINGUP;
+	UBaseEnemyAnimInstance* AnimInstance = Cast<UBaseEnemyAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance) {
+		AnimInstance->Montage_Play(FallingMontage, 1.0);
+		AnimInstance->Montage_JumpToSection(FName("GetUpBack"));
+	}
+	EnableHitBoxes();
+}
+
 void ABaseEnemy::KnockForward(FVector ForceDirection, int32 PowerLvl)
 {
 	LaunchCharacter(FVector(ForceDirection.X * PowerLvl, ForceDirection.Y * PowerLvl, 200), false, false);
 	HitState = EHitState::EHS_FALLFORWARD;
 	DisableHitBoxes();
+	UBaseEnemyAnimInstance* AnimInstance = Cast<UBaseEnemyAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance) {
+		AnimInstance->Montage_Play(FallingMontage, 1.0);
+		AnimInstance->Montage_JumpToSection(FName("FallForwards"));
+	}
+}
+
+void ABaseEnemy::FrontGetUp()
+{
+	HitState = EHitState::EHS_GETTINGUP;
+	UBaseEnemyAnimInstance* AnimInstance = Cast<UBaseEnemyAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance) {
+		AnimInstance->Montage_Play(FallingMontage, 1.0);
+		AnimInstance->Montage_JumpToSection(FName("ForwardImpact"));
+	}
+	EnableHitBoxes();
 }
 
 void ABaseEnemy::KnockDown()
 {
-	UE_LOG(LogTemp, Warning, TEXT("KNOCK DOWN"));
+	HitState = EHitState::EHS_KNOCKEDDOWN;
+	DisableHitBoxes();
+	UBaseEnemyAnimInstance* AnimInstance = Cast<UBaseEnemyAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance) {
+		AnimInstance->Montage_Play(FallingMontage, 1.0);
+		AnimInstance->Montage_JumpToSection(FName("ForwardImpact"));
+	}
 }
 
 void ABaseEnemy::DisableHitBoxes()

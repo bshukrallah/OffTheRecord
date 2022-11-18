@@ -5,6 +5,8 @@
 #include "BaseCharacterAnimInstance.h"
 #include "BaseWeapon.h"
 
+#include "AttackTriggerComponent.h"
+
 #include "Camera/CameraComponent.h"
 
 #include "Components/AudioComponent.h"
@@ -41,12 +43,17 @@ ABaseCharacter::ABaseCharacter() :
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	//Trigger for Attacking
+	AttackBox = CreateDefaultSubobject<UAttackTriggerComponent>(TEXT("Attack Trigger Box"));
+	AttackBox->SetupAttachment(GetRootComponent());
+
 	//Character movement settings
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true; //Character moves in direction of input
-	GetCharacterMovement()->JumpZVelocity = 600.f;
+	GetCharacterMovement()->JumpZVelocity = 900.f;
+	GetCharacterMovement()->GravityScale = 2.0f;
 }
 
 // Called when the game starts or when spawned
@@ -243,6 +250,18 @@ void ABaseCharacter::ComboSetup()
 	}
 }
 
+void ABaseCharacter::EnableAttackBox()
+{
+	AttackBox->EnableCollision();
+	UE_LOG(LogTemp, Warning, TEXT("Attackbox Enabled"));
+}
+
+void ABaseCharacter::DisableAttackBox()
+{
+	AttackBox->DisableCollision();
+	UE_LOG(LogTemp, Warning, TEXT("Attackbox Disabled"));
+}
+
 void ABaseCharacter::PowerUpWeapon()
 {
 	UBaseCharacterAnimInstance* AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
@@ -313,6 +332,22 @@ void ABaseCharacter::ComboAttack(UBaseCharacterAnimInstance* AnimInstanceReferen
 	AnimInstanceReference->Montage_JumpToSection(FName(MontageSection));
 	GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
 	SetCombatState(ECombatState::ECS_ATTACKING);
+}
+
+void ABaseCharacter::EnableWeaponCollision()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->GetAttackBox()->EnableCollision();
+	}
+}
+
+void ABaseCharacter::DisableWeaponCollision()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->GetAttackBox()->DisableCollision();
+	}
 }
 
 void ABaseCharacter::PlayWeaponSwingSound()

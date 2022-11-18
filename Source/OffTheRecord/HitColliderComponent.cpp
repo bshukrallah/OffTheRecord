@@ -2,6 +2,7 @@
 
 
 #include "HitColliderComponent.h"
+#include "AttackTriggerComponent.h"
 #include "Math/Color.h"
 #include "BaseCharacter.h"
 #include "BaseEnemy.h"
@@ -51,30 +52,30 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 		EquippedWeapon = Cast<ABaseWeapon>(OtherComp->GetOwner());
 		if (EquippedWeapon) {
 			int32 WeaponPower = EquippedWeapon->GetPowerLevel();
-			UE_LOG(LogTemp, Warning, TEXT("Weapon Power: %d"), WeaponPower);
-
 			FVector LaunchDirection((OtherActor->GetActorLocation() - this->GetOwner()->GetActorLocation()).GetSafeNormal() * -1);
-
-			if (HitBoxType == EBoxTypes::EBT_FRONT)
+			if (OtherComp->GetClass()->IsChildOf(UAttackTriggerComponent::StaticClass()))
 			{
-				if (BaseEnemyOwner)
+				if (HitBoxType == EBoxTypes::EBT_FRONT)
 				{
-					BaseEnemyOwner->KnockBack(LaunchDirection, WeaponPower);
+					if (BaseEnemyOwner)
+					{
+						BaseEnemyOwner->KnockBack(LaunchDirection, WeaponPower);
+					}
+					if (BaseCharacterOwner)
+					{
+						return;
+					}
 				}
-				if (BaseCharacterOwner)
+				if (HitBoxType == EBoxTypes::EBT_BACK)
 				{
-					return;
-				}
-			}
-			if (HitBoxType == EBoxTypes::EBT_BACK)
-			{
-				if (BaseEnemyOwner)
-				{
-					BaseEnemyOwner->KnockForward(LaunchDirection, WeaponPower);
-				}
-				if (BaseCharacterOwner)
-				{
-					return;
+					if (BaseEnemyOwner)
+					{
+						BaseEnemyOwner->KnockForward(LaunchDirection, WeaponPower);
+					}
+					if (BaseCharacterOwner)
+					{
+						return;
+					}
 				}
 			}
 		}
@@ -84,15 +85,18 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 		BaseCharacter = Cast<ABaseCharacter>(OtherComp->GetOwner());
 		if (BaseCharacter)
 		{
-			if (HitBoxType == EBoxTypes::EBT_TOP)
+			if (OtherComp->GetClass()->IsChildOf(UAttackTriggerComponent::StaticClass()))
 			{
-				if (BaseEnemyOwner)
+				if (HitBoxType == EBoxTypes::EBT_TOP)
 				{
-					BaseEnemyOwner->KnockDown();
-				}
-				if (BaseCharacterOwner)
-				{
-					return;
+					if (BaseEnemyOwner)
+					{
+						BaseEnemyOwner->KnockDown();
+					}
+					if (BaseCharacterOwner)
+					{
+						return;
+					}
 				}
 			}
 		}

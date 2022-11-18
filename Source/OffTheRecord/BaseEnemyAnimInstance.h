@@ -39,6 +39,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 		bool KnockedDown;
 
+	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+		void EnableCollision();
+
 public:
 
 	

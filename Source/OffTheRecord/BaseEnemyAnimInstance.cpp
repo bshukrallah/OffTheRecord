@@ -21,5 +21,30 @@ void UBaseEnemyAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		FVector MovementSpeed(BaseEnemy->GetVelocity());
 		MovementSpeed.Z = 0;
 		Speed = MovementSpeed.Size();
+
+		if (!BaseEnemy->GetMovementComponent()->IsFalling() && BaseEnemy->GetHitState() == EHitState::EHS_FALLFORWARD)
+		{
+			BaseEnemy->FrontGetUp();
+		}
+
+		if (!BaseEnemy->GetMovementComponent()->IsFalling() && BaseEnemy->GetHitState() == EHitState::EHS_FALLBACK)
+		{
+			BaseEnemy->BackGetUp();
+		}
+	}
+
+
+}
+
+void UBaseEnemyAnimInstance::EnableCollision()
+{
+	if (BaseEnemy == nullptr)
+	{
+		BaseEnemy = Cast<ABaseEnemy>(TryGetPawnOwner());
+	}
+	if (BaseEnemy)
+	{
+		BaseEnemy->EnableHitBoxes();
+		BaseEnemy->SetHitState(EHitState::EHS_NORMAL);
 	}
 }

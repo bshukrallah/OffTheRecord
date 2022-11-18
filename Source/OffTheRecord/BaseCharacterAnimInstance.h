@@ -56,6 +56,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PlayerState, meta = (AllowPrivateAccess = "true"))
 		bool bComboFinal;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PlayerMovement, meta = (AllowPrivateAccess = "true"))
+		bool bInAir;
+
 public:
 
 	//Used in the animation blueprint to play full body animation for final combo hit
@@ -67,5 +70,17 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE void SetCharacterState(ECharacterState state) { CharacterState = state; }
+
+	UFUNCTION(BlueprintCallable)
+		void EnableJumpTriggerBox();
+
+	UFUNCTION(BlueprintCallable)
+		void DisableJumpTriggerBox();
+
+	UFUNCTION(BlueprintCallable)
+		void EnableWeaponCollision();
+
+	UFUNCTION(BlueprintCallable)
+		void DisableWeaponCollision();
 
 };

@@ -39,6 +39,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* FollowCamera;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+		class UAttackTriggerComponent* AttackBox;
+
 	//Type of Weapon
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		EWeaponType WeaponType;
@@ -101,6 +104,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE EComboState GetComboState() const { return ComboState; }
 
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE UAttackTriggerComponent* GetAttackBox() const { return AttackBox; }
+
+	UFUNCTION(BlueprintCallable)
+		void EnableAttackBox();
+
+	UFUNCTION(BlueprintCallable)
+		void DisableAttackBox();
+
 	//Public Weapon functions called from anim instance
 	void PowerUpWeapon();
 	void FinishAttack();
@@ -108,6 +120,9 @@ public:
 	void ComboMiss();
 
 	void ComboAttack(class UBaseCharacterAnimInstance* AnimInstanceReference, FName MontageSection, float Speed, float MaxWalkSpeed);
+
+	void EnableWeaponCollision();
+	void DisableWeaponCollision();
 
 	//Weapon Audio
 

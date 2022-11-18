@@ -122,7 +122,6 @@ void ABaseWeapon::SetWeaponStatus(EWeaponStatus Status)
 		break;
 
 	case EWeaponStatus::EWS_WEAPONEQUIPPED:
-		AttackBox->EnableCollision();
 		WeaponMesh->SetSimulatePhysics(false);
 		WeaponMesh->SetEnableGravity(false);
 		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
@@ -147,7 +146,6 @@ void ABaseWeapon::Tick(float DeltaTime)
 
 void ABaseWeapon::DropWeapon()
 {
-
 	FRotator MeshRotation{ 0.f, WeaponMesh->GetComponentRotation().Yaw, 0.f };
 	WeaponMesh->SetWorldRotation(MeshRotation, false, nullptr, ETeleportType::TeleportPhysics);
 
@@ -161,7 +159,6 @@ void ABaseWeapon::DropWeapon()
 	SetWeaponStatus(EWeaponStatus::EWS_WEAPONFALLING);
 	WeaponMesh->AddImpulse(ImpulseDirection*3000);
 
-	
 	FTimerHandle FallingWeaponTimer;
 	GetWorldTimerManager().SetTimer(FallingWeaponTimer, this, &ABaseWeapon::StopFalling, FallingWeaponTime-.5f, false);
 }
