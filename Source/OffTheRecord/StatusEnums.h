@@ -44,3 +44,28 @@ enum class EComboState : uint8
 
 	ECS_MAX UMETA(DisplayName = "DefaultMax")
 };
+
+UENUM(BlueprintType)
+enum class EHitState : uint8
+{
+	//Ready to attack
+	EHS_FALLBACK UMETA(DisplayName = "Falling Backwards"),
+	EHS_FALLFORWARD UMETA(DisplayName = "Falling Forwards"),
+	EHS_KNOCKEDDOWN UMETA(DisplayName = "Knocked Straight Down"),
+	EHS_GETTINGUP UMETA(DisplayName = "Getting Back Up"),
+	EHS_NORMAL UMETA(DisplayName = "Normal State"),
+
+	ECS_MAX UMETA(DisplayName = "DefaultMax")
+};
+
+UENUM(BlueprintType)
+enum class EBoxTypes : uint8
+{
+	//Ready to attack
+	EBT_DEFAULT UMETA(DisplayName = "Default"),
+	EBT_FRONT UMETA(DisplayName = "Front Side Hit Box"),
+	EBT_BACK UMETA(DisplayName = "Back Side Hit Box"),
+	EBT_TOP UMETA(DisplayName = "Top Hit Box"),
+
+	EBT_MAX UMETA(DisplayName = "DefaultMax")
+};

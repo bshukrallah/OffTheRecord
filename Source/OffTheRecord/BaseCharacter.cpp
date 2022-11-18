@@ -5,6 +5,8 @@
 #include "BaseCharacterAnimInstance.h"
 #include "BaseWeapon.h"
 
+#include "AttackTriggerComponent.h"
+
 #include "Camera/CameraComponent.h"
 
 #include "Components/AudioComponent.h"
@@ -25,7 +27,7 @@ ABaseCharacter::ABaseCharacter() :
 	//Character States
 	CombatState(ECombatState::ECS_NOTREADY), ComboState(EComboState::ECS_NOCOMBO), 
 	//Attack Vars
-	bAttackButtonHeld(false), PowerUpCounter(0)
+	bAttackButtonHeld(false), PowerUpCounter(100)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -41,19 +43,23 @@ ABaseCharacter::ABaseCharacter() :
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	//Trigger for Attacking
+	AttackBox = CreateDefaultSubobject<UAttackTriggerComponent>(TEXT("Attack Trigger Box"));
+	AttackBox->SetupAttachment(GetRootComponent());
+
 	//Character movement settings
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true; //Character moves in direction of input
-	GetCharacterMovement()->JumpZVelocity = 600.f;
+	GetCharacterMovement()->JumpZVelocity = 900.f;
+	GetCharacterMovement()->GravityScale = 2.0f;
 }
 
 // Called when the game starts or when spawned
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 // Called every frame
@@ -244,23 +250,41 @@ void ABaseCharacter::ComboSetup()
 	}
 }
 
+void ABaseCharacter::EnableAttackBox()
+{
+	AttackBox->EnableCollision();
+	UE_LOG(LogTemp, Warning, TEXT("Attackbox Enabled"));
+}
+
+void ABaseCharacter::DisableAttackBox()
+{
+	AttackBox->DisableCollision();
+	UE_LOG(LogTemp, Warning, TEXT("Attackbox Disabled"));
+}
+
 void ABaseCharacter::PowerUpWeapon()
 {
 	UBaseCharacterAnimInstance* AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+	if (!EquippedWeapon) { return; }
 	if (bAttackButtonHeld)
 	{
-		PowerUpCounter += 1;
-		UE_LOG(LogTemp, Warning, TEXT("PoweringUp! Level: %d"), PowerUpCounter);
-		ComboAttack(AnimInstance, "WeaponSwing", 1.0f, 50.f);
+		if (PowerUpCounter == 450) 
+		{ PowerUpCounter = 450; }
+		else {
+			PowerUpCounter += 25;
+		}
+		ComboAttack(AnimInstance, "WeaponSwing", 1.0f, 100.f);
 	}
-	else if (PowerUpCounter > 4)
+	else if (PowerUpCounter > 201)
 	{
 		AnimInstance->SetComboFinal(true);
 		GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+		EquippedWeapon->SetPowerLevel(PowerUpCounter);
 	}
-	else if (PowerUpCounter < 5)
+	else if (PowerUpCounter < 200)
 	{
 		GetCharacterMovement()->MaxWalkSpeed = 450.0f;
+		EquippedWeapon->SetPowerLevel(PowerUpCounter);
 	}
 }
 
@@ -272,13 +296,17 @@ void ABaseCharacter::FinishAttack()
 	SetCombatState(ECombatState::ECS_READY);
 	SetComboState(EComboState::ECS_NOCOMBO);
 	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
-	PowerUpCounter = 0;
+	PowerUpCounter = 100;
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->SetPowerLevel(100);
+	}
 }
 
 void ABaseCharacter::ComboHit()
 {
 	//Don't do anything if on final swing or if powered up
-	if (ComboState == EComboState::ECS_COMBO2 || PowerUpCounter > 4) { return; }
+	if (ComboState == EComboState::ECS_COMBO2 || PowerUpCounter > 201) { return; }
 
 	//If ComboState is Combo0 or Combo1 update accordingly, character must also be attacking
 	if (CombatState == ECombatState::ECS_ATTACKING && ComboState == EComboState::ECS_COMBO0)
@@ -306,6 +334,22 @@ void ABaseCharacter::ComboAttack(UBaseCharacterAnimInstance* AnimInstanceReferen
 	SetCombatState(ECombatState::ECS_ATTACKING);
 }
 
+void ABaseCharacter::EnableWeaponCollision()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->GetAttackBox()->EnableCollision();
+	}
+}
+
+void ABaseCharacter::DisableWeaponCollision()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->GetAttackBox()->DisableCollision();
+	}
+}
+
 void ABaseCharacter::PlayWeaponSwingSound()
 {
 	switch (ComboState)
@@ -320,9 +364,10 @@ void ABaseCharacter::PlayWeaponSwingSound()
 
 	case EComboState::ECS_COMBO1:
 		EquippedWeapon->PlayWeaponSwingSound(0);
+		EquippedWeapon->SetPowerLevel(350);
 		break;
 
 	case EComboState::ECS_COMBO2:
-		PowerUpCounter <5 ? EquippedWeapon->PlayWeaponSwingSound(1) : EquippedWeapon->PlayWeaponSwingSound(2);
+		PowerUpCounter < 201 ? EquippedWeapon->PlayWeaponSwingSound(1) : EquippedWeapon->PlayWeaponSwingSound(2);
 	}
 }
