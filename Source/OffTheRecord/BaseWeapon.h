@@ -56,6 +56,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 		class UBoxComponent* PickUpTrigger;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+		class UAttackTriggerComponent* AttackBox;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sound, meta = (AllowPrivateAccess = "true"))
 		class UAudioComponent* WeaponSwingAC;
 
@@ -65,6 +68,7 @@ private:
 	float FallingWeaponTime;
 
 	bool bOrientWeapon;
+	int32 PowerUpLevel;
 
 public:	
 	// Called every frame
@@ -82,5 +86,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Items, meta = (AllowPrivateAccess = "true"))
 		void SetWeaponStatus(EWeaponStatus Status);
 
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE int32 GetPowerLevel() { return PowerUpLevel; }
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE void SetPowerLevel(int32 PowerLevel) { PowerUpLevel = PowerLevel; }
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE UAttackTriggerComponent* GetAttackBox() { return AttackBox; }
 
 };

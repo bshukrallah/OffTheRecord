@@ -2,18 +2,19 @@
 
 #include "BaseWeapon.h"
 
+#include "AttackTriggerComponent.h"
 #include "BaseCharacter.h"
+
 #include "Sound/SoundCue.h"
 #include "TimerManager.h"
 
 #include "Components/AudioComponent.h"
 #include "Components/BoxComponent.h"
-#include "Components/CapsuleComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/StaticMeshComponent.h"
 
 // Sets default values
-ABaseWeapon::ABaseWeapon() : FallingWeaponTime(1.8f), bOrientWeapon(false)
+ABaseWeapon::ABaseWeapon() : FallingWeaponTime(1.8f), bOrientWeapon(false), PowerUpLevel(100)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -24,6 +25,10 @@ ABaseWeapon::ABaseWeapon() : FallingWeaponTime(1.8f), bOrientWeapon(false)
 	//Trigger for picking up the weapon
 	PickUpTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Pick Up Trigger"));
 	PickUpTrigger->SetupAttachment(GetRootComponent());
+
+	//Trigger for Attacking
+	AttackBox = CreateDefaultSubobject<UAttackTriggerComponent>(TEXT("Attack Trigger Box"));
+	AttackBox->SetupAttachment(GetRootComponent());
 
 	//Audio
 	WeaponSwingAC = CreateDefaultSubobject<UAudioComponent>(TEXT("Weapon Swing Sound"));
@@ -64,7 +69,6 @@ void ABaseWeapon::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 			if(BaseCharacter->bPickUpItem)
 			{
 				BaseCharacter->SwapWeapon(this);
-
 			}
 		}
 	}
@@ -99,6 +103,8 @@ void ABaseWeapon::SetWeaponStatus(EWeaponStatus Status)
 		PickUpTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 		PickUpTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
+		AttackBox->DisableCollision();
+
 		break;
 
 	case EWeaponStatus::EWS_WEAPONFALLING:
@@ -111,6 +117,8 @@ void ABaseWeapon::SetWeaponStatus(EWeaponStatus Status)
 		PickUpTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		PickUpTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+		AttackBox->DisableCollision();
+
 		break;
 
 	case EWeaponStatus::EWS_WEAPONEQUIPPED:
@@ -120,8 +128,7 @@ void ABaseWeapon::SetWeaponStatus(EWeaponStatus Status)
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 		PickUpTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-		PickUpTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	
+		PickUpTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 
@@ -139,7 +146,6 @@ void ABaseWeapon::Tick(float DeltaTime)
 
 void ABaseWeapon::DropWeapon()
 {
-
 	FRotator MeshRotation{ 0.f, WeaponMesh->GetComponentRotation().Yaw, 0.f };
 	WeaponMesh->SetWorldRotation(MeshRotation, false, nullptr, ETeleportType::TeleportPhysics);
 
@@ -153,7 +159,6 @@ void ABaseWeapon::DropWeapon()
 	SetWeaponStatus(EWeaponStatus::EWS_WEAPONFALLING);
 	WeaponMesh->AddImpulse(ImpulseDirection*3000);
 
-	
 	FTimerHandle FallingWeaponTimer;
 	GetWorldTimerManager().SetTimer(FallingWeaponTimer, this, &ABaseWeapon::StopFalling, FallingWeaponTime-.5f, false);
 }
