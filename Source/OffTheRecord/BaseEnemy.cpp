@@ -2,6 +2,7 @@
 
 
 #include "BaseEnemy.h"
+#include "BaseRecord.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HitColliderComponent.h"
 #include "BaseEnemyAnimInstance.h"
@@ -23,6 +24,9 @@ ABaseEnemy::ABaseEnemy() : HitState(EHitState::EHS_NORMAL)
 	TopHitBox = CreateDefaultSubobject<UHitColliderComponent>(TEXT("Top Hit Box"));
 	TopHitBox->SetupAttachment(GetRootComponent());
 	TopHitBox->SetType(EBoxTypes::EBT_TOP);
+
+
+
 }
 
 // Called when the game starts or when spawned
@@ -49,7 +53,7 @@ void ABaseEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 void ABaseEnemy::KnockBack(FVector ForceDirection, int32 PowerLvl)
 {
-	LaunchCharacter(FVector(ForceDirection.X * (PowerLvl*2), ForceDirection.Y * (PowerLvl*20), 200), false, false);
+	LaunchCharacter(FVector(ForceDirection.X * (PowerLvl*2), ForceDirection.Y * (PowerLvl*2), 200), false, false);
 	HitState = EHitState::EHS_FALLBACK;
 	DisableHitBoxes();
 	UBaseEnemyAnimInstance* AnimInstance = Cast<UBaseEnemyAnimInstance>(GetMesh()->GetAnimInstance());

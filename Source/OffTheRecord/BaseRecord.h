@@ -37,4 +37,5 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = Movement)
 		float SpinValue;
+
 };

@@ -141,7 +141,6 @@ void ABaseWeapon::Tick(float DeltaTime)
 		FRotator MeshRotation{ 0.f, GetWeaponMesh()->GetComponentRotation().Yaw, 180.f};
 		GetWeaponMesh()->SetWorldRotation(MeshRotation, false, nullptr, ETeleportType::TeleportPhysics);
 	}
-
 }
 
 void ABaseWeapon::DropWeapon()
