@@ -24,3 +24,8 @@ void ABaseRecord::Tick(float DeltaTime)
 	AddActorLocalRotation(QuatRotation, false, 0, ETeleportType::None);
 }
 
+void ABaseRecord::SetRecordSpeed(float Increment)
+{
+	SpinValue = SpinValue + Increment;
+}
+

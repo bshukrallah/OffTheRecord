@@ -7,6 +7,7 @@
 #include "BaseCharacter.h"
 #include "BaseEnemy.h"
 #include "BaseWeapon.h"
+#include "BaseRecord.h"
 
 UHitColliderComponent::UHitColliderComponent() : bCollisionEnabled(false), HitBoxType(EBoxTypes::EBT_DEFAULT)
 {
@@ -127,6 +128,8 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 	//Temp Logging
 	if (EquippedWeapon) {
 		UE_LOG(LogTemp, Warning, TEXT("Weapon Hit"));
+		//the goal here is to increase the record speed on successful weapon hits. however this crashes the editor on enemy hit. Suggestions?? 
+		BaseRecord->SetRecordSpeed(.3f);
 	}
 	if (BaseCharacter) {
 		UE_LOG(LogTemp, Warning, TEXT("Character Hit"));
