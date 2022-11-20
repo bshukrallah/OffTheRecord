@@ -37,6 +37,17 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		UAnimMontage* FallingMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		ECombatState CombatState;
+
+	class ABaseEnemyAIController* AIController;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		bool bCharge;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -63,8 +74,29 @@ public:
 		FORCEINLINE EHitState GetHitState() const { return HitState; }
 
 	UFUNCTION(BlueprintCallable)
+		FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE void SetCombatState(ECombatState CState) { CombatState = CState; }
+
+	UFUNCTION(BlueprintCallable)
 		FORCEINLINE void SetHitState(EHitState 
 			eHitState) { HitState = eHitState; }
+
+	UFUNCTION(BlueprintCallable)
+		void ResetState();
+
+	UFUNCTION(BlueprintCallable)
+		void ResetAI();
+
+	UFUNCTION(BlueprintCallable)
+		void SetFallState(EHitState eHitState);
+
+	UFUNCTION(BlueprintCallable)
+		void Attack(FName MontageSection, bool isJumpAttack);
+
+	UFUNCTION(BlueprintCallable)
+		void Charge();
 
 	void DisableHitBoxes();
 	void EnableHitBoxes();

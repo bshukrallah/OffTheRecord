@@ -42,7 +42,20 @@ private:
 	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
 		void EnableCollision();
 
-public:
+	UFUNCTION(BlueprintCallable, Category = "AI Settings")
+		void EnableAI();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		bool bCharge;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		bool bJumpAttack;
+
+public:
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE void isCharging(bool charge) { bCharge = charge; }
 	
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE void isJumpAttack(bool JumpAttack) { bJumpAttack = JumpAttack; }
+
 };

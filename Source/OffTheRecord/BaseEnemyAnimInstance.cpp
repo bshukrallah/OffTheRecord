@@ -6,7 +6,7 @@
 #include "StatusEnums.h"
 #include "BaseEnemy.h"
 
-UBaseEnemyAnimInstance::UBaseEnemyAnimInstance() : Speed(0.f), KnockedBackwards(false), KnockedForwards(false), KnockedDown(false)
+UBaseEnemyAnimInstance::UBaseEnemyAnimInstance() : Speed(0.f), KnockedBackwards(false), KnockedForwards(false), KnockedDown(false), bCharge(false), bJumpAttack(false)
 {
 }
 
@@ -45,6 +45,19 @@ void UBaseEnemyAnimInstance::EnableCollision()
 	if (BaseEnemy)
 	{
 		BaseEnemy->EnableHitBoxes();
-		BaseEnemy->SetHitState(EHitState::EHS_NORMAL);
+		BaseEnemy->ResetState();
 	}
+}
+
+void UBaseEnemyAnimInstance::EnableAI()
+{
+	if (BaseEnemy == nullptr)
+	{
+		BaseEnemy = Cast<ABaseEnemy>(TryGetPawnOwner());
+	}
+	if (BaseEnemy)
+	{
+		BaseEnemy->ResetAI();
+	}
+
 }

@@ -28,6 +28,7 @@ enum class ECombatState : uint8
 	ECS_NOTREADY UMETA(DisplayName = "Not Ready to Attack"),
 	//Currently attacking
 	ECS_ATTACKING UMETA(DisplayName = "Attacking"),
+	ECS_CHARGING UMETA(DisplayName = "Charging"),
 
 	ECS_MAX UMETA(DisplayName = "DefaultMax")
 };
