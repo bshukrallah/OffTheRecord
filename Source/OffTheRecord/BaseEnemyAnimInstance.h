@@ -27,7 +27,7 @@ private:
 		class ABaseEnemy* BaseEnemy;
 
 	//Variable for character velocity speed
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement, meta = (AllowPrivateAccess = "true"))
 		float Speed;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
@@ -48,14 +48,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		bool bCharge;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
-		bool bJumpAttack;
-
 public:
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE void isCharging(bool charge) { bCharge = charge; }
 	
-	UFUNCTION(BlueprintCallable)
-		FORCEINLINE void isJumpAttack(bool JumpAttack) { bJumpAttack = JumpAttack; }
+
 
 };

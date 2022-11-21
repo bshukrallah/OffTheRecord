@@ -93,7 +93,7 @@ public:
 		void SetFallState(EHitState eHitState);
 
 	UFUNCTION(BlueprintCallable)
-		void Attack(FName MontageSection, bool isJumpAttack);
+		void Attack(FName MontageSection, float AnimSpeed);
 
 	UFUNCTION(BlueprintCallable)
 		void Charge();

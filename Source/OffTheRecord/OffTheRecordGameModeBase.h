@@ -13,5 +13,16 @@ UCLASS()
 class OFFTHERECORD_API AOffTheRecordGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+public:
+	AOffTheRecordGameModeBase();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+
+private:
+
+public:
 	
 };

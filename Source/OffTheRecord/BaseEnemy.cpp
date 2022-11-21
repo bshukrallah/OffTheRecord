@@ -136,20 +136,27 @@ void ABaseEnemy::SetFallState(EHitState eHitState)
 	}
 }
 
-void ABaseEnemy::Attack(FName MontageSection, bool IsJumpAttack)
+void ABaseEnemy::Attack(FName MontageSection, float AnimSpeed)
 {
 	UBaseEnemyAnimInstance* AnimInstance = Cast<UBaseEnemyAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ATTACK!"));
-		AnimInstance->Montage_Play(AttackMontage, 1.0f);
+		AnimInstance->Montage_Play(AttackMontage, AnimSpeed);
 		AnimInstance->Montage_JumpToSection(FName(MontageSection));
-		IsJumpAttack == true ? AnimInstance->isJumpAttack(true) : AnimInstance->isJumpAttack(false);
 	}
 }
 
 void ABaseEnemy::Charge()
 {
+	UCharacterMovementComponent* EnemyMovement = Cast<UCharacterMovementComponent>(this->GetMovementComponent());
+	if (EnemyMovement)
+	{
+		EnemyMovement->MaxWalkSpeed = 1200.0f;
+		EnemyMovement->MaxAcceleration = 1200.0f;
+		EnemyMovement->GroundFriction = .5f;
+	}
+	Attack("Taunt", 1.0f);
 }
 
 void ABaseEnemy::DisableHitBoxes()

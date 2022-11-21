@@ -4,7 +4,6 @@
 #include "BaseEnemyAIController.h"
 #include "Kismet/GameplayStatics.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "StatusEnums.h"
 #include "BaseEnemy.h"
 
@@ -54,5 +53,4 @@ void ABaseEnemyAIController::SetEnemyAIState(EAIState state)
 {
 	AIState = state; //for tracking
 	GetBlackboardComponent()->SetValueAsEnum(TEXT("AIStatus"), (uint8)state);
-
 }

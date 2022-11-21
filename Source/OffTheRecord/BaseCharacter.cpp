@@ -7,7 +7,7 @@
 
 #include "AttackTriggerComponent.h"
 
-#include "Camera/CameraComponent.h"
+//#include "Camera/CameraComponent.h"
 
 #include "Components/AudioComponent.h"
 #include "Components/BoxComponent.h"
@@ -16,7 +16,7 @@
 
 #include "GameFramework/PlayerInput.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/SpringArmComponent.h"
+//#include "GameFramework/SpringArmComponent.h"
 
 #include "Sound/SoundCue.h"
 
@@ -32,6 +32,7 @@ ABaseCharacter::ABaseCharacter() :
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	/*
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -42,7 +43,7 @@ ABaseCharacter::ABaseCharacter() :
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
-
+	*/
 	//Trigger for Attacking
 	AttackBox = CreateDefaultSubobject<UAttackTriggerComponent>(TEXT("Attack Trigger Box"));
 	AttackBox->SetupAttachment(GetRootComponent());
@@ -54,6 +55,7 @@ ABaseCharacter::ABaseCharacter() :
 	GetCharacterMovement()->bOrientRotationToMovement = true; //Character moves in direction of input
 	GetCharacterMovement()->JumpZVelocity = 900.f;
 	GetCharacterMovement()->GravityScale = 2.0f;
+	GetCharacterMovement()->bIgnoreBaseRotation = true;
 }
 
 // Called when the game starts or when spawned

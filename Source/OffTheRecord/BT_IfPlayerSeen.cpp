@@ -25,8 +25,8 @@ void UBT_IfPlayerSeen::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
 
 	float distance = OwnerComp.GetAIOwner()->GetPawn()->GetDistanceTo(PlayerPawn);
 
-	if (OwnerComp.GetAIOwner()->LineOfSightTo(PlayerPawn) && distance < 300.0f) {
-		OwnerComp.GetBlackboardComponent()->SetValueAsObject(GetSelectedBlackboardKey(), PlayerPawn);
+	if (OwnerComp.GetAIOwner()->LineOfSightTo(PlayerPawn) && distance < 800.0f) {
+		OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), PlayerPawn->GetActorLocation());
 	}
 	else
 	{

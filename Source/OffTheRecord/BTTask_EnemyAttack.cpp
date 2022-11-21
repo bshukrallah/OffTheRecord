@@ -11,6 +11,7 @@ UBTTask_EnemyAttack::UBTTask_EnemyAttack()
 
 EBTNodeResult::Type UBTTask_EnemyAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	int32 AttackChoice = FMath::RandRange(1, 2);
 	ABaseEnemy* BaseEnemy = Cast<ABaseEnemy>(OwnerComp.GetAIOwner()->GetPawn());
 	if (BaseEnemy) {
 		ABaseEnemyAIController* AIController = Cast<ABaseEnemyAIController>(BaseEnemy->GetController());
@@ -19,15 +20,15 @@ EBTNodeResult::Type UBTTask_EnemyAttack::ExecuteTask(UBehaviorTreeComponent& Own
 			switch (AIState)
 			{
 			case EAIState::EAS_ATTACKP1:
-				BaseEnemy->Attack("Punch1", false);
+				AttackChoice == 1 ? BaseEnemy->Attack("Punch1", 1.0f) : BaseEnemy->Attack("Punch2", 1.0f);
 				break;
 
 			case EAIState::EAS_ATTACKP2:
-				BaseEnemy->Attack("JumpAttack", true);
+				BaseEnemy->Attack("JumpAttack", 1.4f);
 				break;
 
 			case EAIState::EAS_ATTACKP3:
-				return EBTNodeResult::Type();
+				BaseEnemy->Charge();
 			}
 		}
 	}

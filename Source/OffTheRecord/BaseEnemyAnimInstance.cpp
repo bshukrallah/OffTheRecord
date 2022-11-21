@@ -6,7 +6,7 @@
 #include "StatusEnums.h"
 #include "BaseEnemy.h"
 
-UBaseEnemyAnimInstance::UBaseEnemyAnimInstance() : Speed(0.f), KnockedBackwards(false), KnockedForwards(false), KnockedDown(false), bCharge(false), bJumpAttack(false)
+UBaseEnemyAnimInstance::UBaseEnemyAnimInstance() : Speed(0.f), KnockedBackwards(false), KnockedForwards(false), KnockedDown(false), bCharge(false)
 {
 }
 
@@ -21,6 +21,8 @@ void UBaseEnemyAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		FVector MovementSpeed(BaseEnemy->GetVelocity());
 		MovementSpeed.Z = 0;
 		Speed = MovementSpeed.Size();
+
+		UE_LOG(LogTemp, Warning, TEXT("Enemy Speed: %f"), Speed);
 
 		if (!BaseEnemy->GetMovementComponent()->IsFalling() && BaseEnemy->GetHitState() == EHitState::EHS_FALLFORWARD)
 		{
