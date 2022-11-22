@@ -8,6 +8,8 @@
 #include "BaseEnemy.h"
 #include "BaseWeapon.h"
 #include "BaseRecord.h"
+#include "EngineUtils.h"
+#include "Kismet/GameplayStatics.h"
 
 UHitColliderComponent::UHitColliderComponent() : bCollisionEnabled(false), HitBoxType(EBoxTypes::EBT_DEFAULT)
 {
@@ -19,6 +21,8 @@ void UHitColliderComponent::BeginPlay()
 	Super::BeginPlay();
 
 	EnableCollision();
+	
+	BaseRecord = Cast<ABaseRecord>(UGameplayStatics::GetActorOfClass(GetWorld(), ABaseRecord::StaticClass()));
 
 	if (this->GetOwner()->GetClass()->IsChildOf(ABaseCharacter::StaticClass()))
 	{
@@ -128,8 +132,11 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 	//Temp Logging
 	if (EquippedWeapon) {
 		UE_LOG(LogTemp, Warning, TEXT("Weapon Hit"));
-		//the goal here is to increase the record speed on successful weapon hits. however this crashes the editor on enemy hit. Suggestions?? 
-		BaseRecord->SetRecordSpeed(.3f);
+		if (BaseRecord)
+		{
+			BaseRecord->SetRecordSpeed(.009f);
+			UE_LOG(LogTemp, Warning, TEXT("Record Speed increase"));
+		}
 	}
 	if (BaseCharacter) {
 		UE_LOG(LogTemp, Warning, TEXT("Character Hit"));
