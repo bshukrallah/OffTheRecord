@@ -125,6 +125,7 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 	
 
 	//Temp Logging
+	/*
 	if (EquippedWeapon) {
 		UE_LOG(LogTemp, Warning, TEXT("Weapon Hit"));
 	}
@@ -138,6 +139,7 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 	if (OtherActor->GetClass()->IsChildOf(ABaseCharacter::StaticClass())) {
 		UE_LOG(LogTemp, Warning, TEXT("Collide with Base Character"));
 	}
+	*/
 
 }
 

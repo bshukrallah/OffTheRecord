@@ -4,49 +4,73 @@
 #include "BaseCharacter.h"
 #include "BaseCharacterAnimInstance.h"
 #include "BaseWeapon.h"
+#include "BaseEnemy.h"
 
 #include "AttackTriggerComponent.h"
 
-//#include "Camera/CameraComponent.h"
+#include "Camera/CameraComponent.h"
 
 #include "Components/AudioComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 
 #include "Engine/SkeletalMeshSocket.h"
 
 #include "GameFramework/PlayerInput.h"
 #include "GameFramework/CharacterMovementComponent.h"
-//#include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+
+#include "HitColliderComponent.h"
 
 #include "Sound/SoundCue.h"
 
+
 // Sets default values
-ABaseCharacter::ABaseCharacter() : 
-	CharacterState(ECharacterState::ECS_UNARMED), 
-	OverlappedWeaponCount(0), 
+ABaseCharacter::ABaseCharacter() :
+	CharacterState(ECharacterState::ECS_UNARMED),
+	OverlappedWeaponCount(0), OverlappedEnemyCount(0),
 	//Character States
-	CombatState(ECombatState::ECS_NOTREADY), ComboState(EComboState::ECS_NOCOMBO), 
+	CombatState(ECombatState::ECS_NOTREADY), ComboState(EComboState::ECS_NOCOMBO),
 	//Attack Vars
-	bAttackButtonHeld(false), PowerUpCounter(100)
+	bAttackButtonHeld(false), PowerUpCounter(100),
+	//Camera
+	bZoomCam(false), CurrentTargetLength(500.f), bDynamicRotataton(false), CurrentPitch(-35.f)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	/*
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
+	CameraBoom->TargetArmLength = 500.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
+	CameraBoom->SetRelativeRotation(FRotator(-35.f, 0.f, 0.f));
+	CameraBoom->bDoCollisionTest = false;
+	CameraBoom->bInheritPitch = false;
+	CameraBoom->bEnableCameraLag = true;
+	CameraBoom->CameraLagSpeed = 2.f;
 
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
-	*/
+	FollowCamera->SetFieldOfView(105.f);
+
+	CameraControl = CreateDefaultSubobject<USphereComponent>(TEXT("CameraController"));
+	CameraControl->SetupAttachment(GetRootComponent());
+	CameraControl->SetRelativeScale3D(FVector(8.0f, 8.0f, 8.0f));
+
 	//Trigger for Attacking
 	AttackBox = CreateDefaultSubobject<UAttackTriggerComponent>(TEXT("Attack Trigger Box"));
 	AttackBox->SetupAttachment(GetRootComponent());
+
+	FrontHitBox = CreateDefaultSubobject<UHitColliderComponent>(TEXT("Front Hit Box"));
+	FrontHitBox->SetupAttachment(GetRootComponent());
+	FrontHitBox->SetType(EBoxTypes::EBT_FRONT);
+
+	BackHitBox = CreateDefaultSubobject<UHitColliderComponent>(TEXT("Back Hit Box"));
+	BackHitBox->SetupAttachment(GetRootComponent());
+	BackHitBox->SetType(EBoxTypes::EBT_BACK);
 
 	//Character movement settings
 	bUseControllerRotationPitch = false;
@@ -62,12 +86,26 @@ ABaseCharacter::ABaseCharacter() :
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CameraControl->OnComponentBeginOverlap.AddDynamic(this, &ABaseCharacter::OnOverlap);
+	CameraControl->OnComponentEndOverlap.AddDynamic(this, &ABaseCharacter::OnEndOverlap);
+}
+
+void ABaseCharacter::DynamicCamera(float DeltaTime)
+{
+	bZoomCam == true ? CurrentTargetLength = FMath::FInterpTo(CurrentTargetLength, 300.f, DeltaTime, 3.f) : CurrentTargetLength = FMath::FInterpTo(CurrentTargetLength, 500.f, DeltaTime, 6.f);
+
+	bDynamicRotataton == true ? CurrentPitch = FMath::FInterpTo(CurrentPitch, -5.f, DeltaTime, 2.f) : CurrentPitch = FMath::FInterpTo(CurrentPitch, -35.f, DeltaTime, 5.f);
+
+	CameraBoom->TargetArmLength = CurrentTargetLength;
+	CameraBoom->SetRelativeRotation(FRotator(CurrentPitch, 0.f, 0.f));
 }
 
 // Called every frame
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	DynamicCamera(DeltaTime);
 
 }
 
@@ -174,11 +212,38 @@ void ABaseCharacter::EquipWeapon(ABaseWeapon* Weapon)
 	}
 }
 
+void ABaseCharacter::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor->GetClass()->IsChildOf(ABaseEnemy::StaticClass())) {
+		OverlapEnemyCounter(1);
+	}
+}
+
+void ABaseCharacter::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	OverlapEnemyCounter(-1);
+}
+
 void ABaseCharacter::SwapWeapon(ABaseWeapon* Weapon)
 {
 	if (Weapon) {
 		DropWeapon();
 		EquipWeapon(Weapon);
+	}
+}
+
+void ABaseCharacter::OverlapEnemyCounter(int8 Amount)
+{
+	if (OverlappedWeaponCount + Amount <= 0) {
+		OverlappedWeaponCount = 0;
+		bZoomCam = false;
+		bDynamicRotataton = false;
+	}
+	else
+	{
+		OverlappedWeaponCount += Amount;
+		bZoomCam = true;
+		bDynamicRotataton = true;
 	}
 }
 
@@ -262,6 +327,22 @@ void ABaseCharacter::DisableAttackBox()
 {
 	AttackBox->DisableCollision();
 	UE_LOG(LogTemp, Warning, TEXT("Attackbox Disabled"));
+}
+
+void ABaseCharacter::KnockBack(FVector ForceDirection, int32 PowerLvl)
+{
+}
+
+void ABaseCharacter::BackGetUp()
+{
+}
+
+void ABaseCharacter::FrontGetUp()
+{
+}
+
+void ABaseCharacter::KnockForward(FVector ForceDirection, int32 PowerLvl)
+{
 }
 
 void ABaseCharacter::PowerUpWeapon()

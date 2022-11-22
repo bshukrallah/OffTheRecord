@@ -141,7 +141,6 @@ void ABaseEnemy::Attack(FName MontageSection, float AnimSpeed)
 	UBaseEnemyAnimInstance* AnimInstance = Cast<UBaseEnemyAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ATTACK!"));
 		AnimInstance->Montage_Play(AttackMontage, AnimSpeed);
 		AnimInstance->Montage_JumpToSection(FName(MontageSection));
 	}

@@ -13,7 +13,6 @@ UBTTask_AttackDecision::UBTTask_AttackDecision()
 
 EBTNodeResult::Type UBTTask_AttackDecision::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Deciding..."));
 	int32 AttackChoice = FMath::RandRange(1, 6);
 	ABaseEnemy* BaseEnemy = Cast<ABaseEnemy>(OwnerComp.GetAIOwner()->GetPawn());
 	ABaseEnemyAIController* AIController = Cast<ABaseEnemyAIController>(BaseEnemy->GetController());

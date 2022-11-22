@@ -98,7 +98,7 @@ void ABaseWeapon::SetWeaponStatus(EWeaponStatus Status)
 		WeaponMesh->SetSimulatePhysics(false);
 		WeaponMesh->SetEnableGravity(false);
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 
 		PickUpTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 		PickUpTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -111,7 +111,7 @@ void ABaseWeapon::SetWeaponStatus(EWeaponStatus Status)
 		WeaponMesh->SetSimulatePhysics(true);
 		WeaponMesh->SetEnableGravity(true);
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
 
 		PickUpTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);

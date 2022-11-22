@@ -22,8 +22,6 @@ void UBaseEnemyAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		MovementSpeed.Z = 0;
 		Speed = MovementSpeed.Size();
 
-		UE_LOG(LogTemp, Warning, TEXT("Enemy Speed: %f"), Speed);
-
 		if (!BaseEnemy->GetMovementComponent()->IsFalling() && BaseEnemy->GetHitState() == EHitState::EHS_FALLFORWARD)
 		{
 			BaseEnemy->FrontGetUp();

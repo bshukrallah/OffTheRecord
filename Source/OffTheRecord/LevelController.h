@@ -22,8 +22,7 @@ protected:
 
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		class AActor* WorldCamera;
+
 
 public:
 
