@@ -56,7 +56,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		EBoxTypes HitBoxType;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component Owner", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component Owner", meta = (AllowPrivateAccess = "true"))
 		class ABaseRecord* BaseRecord;
 
 public:
