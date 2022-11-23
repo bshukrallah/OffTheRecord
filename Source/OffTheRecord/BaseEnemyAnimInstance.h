@@ -48,6 +48,18 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		bool bCharge;
 
+	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+		void DisableAttackCollision();
+
+	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+		void EnableRightHandCollision();
+
+	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+		void EnableLeftHandCollision();
+
+	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+		void EnableJumpCollision();
+
 public:
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE void isCharging(bool charge) { bCharge = charge; }

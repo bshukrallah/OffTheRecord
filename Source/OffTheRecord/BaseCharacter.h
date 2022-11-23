@@ -87,15 +87,23 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		UAnimMontage* AttackMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		UAnimMontage* FallingMontage;
+
 	void DynamicCamera(float DeltaTime);
+	void SetDynamicYaw();
 
 	//Dynamic Camera
 	float CurrentTargetLength;
 	float CurrentPitch;
+	float CurrentDynamicYaw;
+	float DefaultDynamicYaw;
+	float TargetDynamicYaw;
+	float DynamicYawSpeed;
 
 	bool bAttackButtonHeld;
 	bool bZoomCam;
-	bool bDynamicRotataton;
+	bool bDynamicRotation;
 	int32 PowerUpCounter;
 
 public:	
@@ -141,17 +149,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void DisableAttackBox();
 
-	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
-		void KnockBack(FVector ForceDirection, int32 PowerLvl);
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+		void KnockBack(FVector ForceDirection, FName Type, int32 PowerLvl);
 
-	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
-		void BackGetUp();
+	UFUNCTION(BlueprintCallable)
+		void Recover();
 
-	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
-		void FrontGetUp();
+	UFUNCTION(BlueprintCallable)
+		void DisableCharacter(bool disable);
 
-	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
-		void KnockForward(FVector ForceDirection, int32 PowerLvl);
+
 
 	//Public Weapon functions called from anim instance
 	void PowerUpWeapon();
@@ -163,6 +170,9 @@ public:
 
 	void EnableWeaponCollision();
 	void DisableWeaponCollision();
+
+	void DisableHitBoxes();
+	void EnableHitBoxes();
 
 	//Weapon Audio
 

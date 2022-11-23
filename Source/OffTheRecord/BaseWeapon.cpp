@@ -34,7 +34,7 @@ ABaseWeapon::ABaseWeapon() : FallingWeaponTime(1.8f), bOrientWeapon(false), Powe
 	WeaponSwingAC = CreateDefaultSubobject<UAudioComponent>(TEXT("Weapon Swing Sound"));
 	WeaponSwingAC->bAutoActivate = false;
 	WeaponSwingAC->SetupAttachment(GetRootComponent());
-	WeaponSwingAC->SetRelativeLocation(FVector(30.f, 0.0f, 0.0f));
+	WeaponSwingAC->SetRelativeLocation(FVector(1.f, 0.0f, 0.0f));
 }
 
 // Called when the game starts or when spawned

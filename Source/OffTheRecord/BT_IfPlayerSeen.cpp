@@ -2,11 +2,13 @@
 
 
 #include "BT_IfPlayerSeen.h"
-#include "AIController.h"
+//#include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/Pawn.h"
+//#include "GameFramework/Pawn.h"
 #include "GameFramework/Controller.h"
+#include "BaseEnemyAIController.h"
+#include "BaseEnemy.h"
 
 UBT_IfPlayerSeen::UBT_IfPlayerSeen()
 {
@@ -24,13 +26,16 @@ void UBT_IfPlayerSeen::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
 	}
 
 	float distance = OwnerComp.GetAIOwner()->GetPawn()->GetDistanceTo(PlayerPawn);
-
-	if (OwnerComp.GetAIOwner()->LineOfSightTo(PlayerPawn) && distance < 800.0f) {
-		OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), PlayerPawn->GetActorLocation());
+	if (OwnerComp.GetAIOwner()->LineOfSightTo(PlayerPawn) && distance < 1200.0f) {
+		OwnerComp.GetBlackboardComponent()->SetValueAsObject(GetSelectedBlackboardKey(), PlayerPawn);
 	}
 	else
 	{
+		//ABaseEnemy* BaseEnemy = Cast<ABaseEnemy>(OwnerComp.GetAIOwner()->GetPawn());
+		//ABaseEnemyAIController* AIController = Cast<ABaseEnemyAIController>(BaseEnemy->GetController());
+		//AIController->SetEnemyAIState(EAIState::EAS_IDLE);
 		OwnerComp.GetBlackboardComponent()->ClearValue(GetSelectedBlackboardKey());
+
 	}
 
 }

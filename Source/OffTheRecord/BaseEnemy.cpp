@@ -2,14 +2,18 @@
 
 
 #include "BaseEnemy.h"
-#include "BaseRecord.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "HitColliderComponent.h"
+
+
 #include "BaseEnemyAnimInstance.h"
 #include "BaseEnemyAIController.h"
 
+
+#include "GameFramework/CharacterMovementComponent.h"
+#include "HitColliderComponent.h"
+
+
 // Sets default values
-ABaseEnemy::ABaseEnemy() : HitState(EHitState::EHS_NORMAL), CombatState(ECombatState::ECS_READY), bCharge(false)
+ABaseEnemy::ABaseEnemy() : HitState(EHitState::EHS_NORMAL), CombatState(ECombatState::ECS_READY), bCharge(false), PowerLevel(150)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -25,6 +29,19 @@ ABaseEnemy::ABaseEnemy() : HitState(EHitState::EHS_NORMAL), CombatState(ECombatS
 	TopHitBox = CreateDefaultSubobject<UHitColliderComponent>(TEXT("Top Hit Box"));
 	TopHitBox->SetupAttachment(GetRootComponent());
 	TopHitBox->SetType(EBoxTypes::EBT_TOP);
+
+	LeftAttackBox = CreateDefaultSubobject<UAttackTriggerComponent>(TEXT("Left Hand Attack Box"));
+	LeftAttackBox->SetupAttachment(GetRootComponent());
+
+	RightAttackBox = CreateDefaultSubobject<UAttackTriggerComponent>(TEXT("Right Hand Attack Box"));
+	RightAttackBox->SetupAttachment(GetRootComponent());
+	
+	ChargeAttackBox = CreateDefaultSubobject<UAttackTriggerComponent>(TEXT("Charge Attack Box"));
+	ChargeAttackBox->SetupAttachment(GetRootComponent());
+
+	JumpAttackBox = CreateDefaultSubobject<UAttackTriggerComponent>(TEXT("Jump Attack Box"));
+	JumpAttackBox->SetupAttachment(GetRootComponent());
+
 }
 
 // Called when the game starts or when spawned
@@ -37,6 +54,7 @@ void ABaseEnemy::BeginPlay()
 	{
 		AIController->SetEnemyAIState(EAIState::EAS_READY);
 	}
+	DisableAttackBoxes();
 }
 
 
@@ -54,9 +72,18 @@ void ABaseEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 }
 
+void ABaseEnemy::Idle(FName MontageSection)
+{
+	UBaseEnemyAnimInstance* AnimInstance = Cast<UBaseEnemyAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance) {
+		AnimInstance->Montage_Play(IdleMontage, 1.0);
+		AnimInstance->Montage_JumpToSection(FName(MontageSection));
+	}
+}
+
 void ABaseEnemy::KnockBack(FVector ForceDirection, int32 PowerLvl)
 {
-	LaunchCharacter(FVector(ForceDirection.X * (PowerLvl*2), ForceDirection.Y * (PowerLvl*2), 200), false, false);
+	LaunchCharacter(FVector(ForceDirection.X * PowerLvl, ForceDirection.Y * PowerLvl, 300), false, false);
 	SetFallState(EHitState::EHS_FALLBACK);
 	DisableHitBoxes();
 	UBaseEnemyAnimInstance* AnimInstance = Cast<UBaseEnemyAnimInstance>(GetMesh()->GetAnimInstance());
@@ -80,7 +107,7 @@ void ABaseEnemy::BackGetUp()
 
 void ABaseEnemy::KnockForward(FVector ForceDirection, int32 PowerLvl)
 {
-	LaunchCharacter(FVector(ForceDirection.X * PowerLvl, ForceDirection.Y * PowerLvl, 200), false, false);
+	LaunchCharacter(FVector(ForceDirection.X * PowerLvl, ForceDirection.Y * PowerLvl, 300), false, false);
 	SetFallState(EHitState::EHS_FALLFORWARD);
 	DisableHitBoxes();
 	UBaseEnemyAnimInstance* AnimInstance = Cast<UBaseEnemyAnimInstance>(GetMesh()->GetAnimInstance());
@@ -170,4 +197,33 @@ void ABaseEnemy::EnableHitBoxes()
 	FrontHitBox->EnableCollision();
 	BackHitBox->EnableCollision();
 	TopHitBox->EnableCollision();
+}
+
+void ABaseEnemy::DisableAttackBoxes()
+{
+	LeftAttackBox->DisableCollision();
+	RightAttackBox->DisableCollision();
+	ChargeAttackBox->DisableCollision();
+	JumpAttackBox->DisableCollision();
+}
+
+void ABaseEnemy::EnableJumpAttackBox()
+{
+	UE_LOG(LogTemp, Warning, TEXT("JumpBox Enabled"));
+	JumpAttackBox->EnableCollision();
+}
+
+void ABaseEnemy::DisableChargeAttackBox()
+{
+	if (ChargeAttackBox->GetCollisionEnabled()) {
+		ChargeAttackBox->DisableCollision();
+	}
+}
+
+void ABaseEnemy::EnableChargeAttackBox()
+{
+	if (!ChargeAttackBox->GetCollisionEnabled()) {
+		UE_LOG(LogTemp, Warning, TEXT("ChargeBox Enabled"));
+		ChargeAttackBox->EnableCollision();
+	} 
 }

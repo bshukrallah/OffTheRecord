@@ -22,6 +22,9 @@ void UBaseEnemyAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		MovementSpeed.Z = 0;
 		Speed = MovementSpeed.Size();
 
+		Speed >= 601.f ? BaseEnemy->EnableChargeAttackBox() : BaseEnemy->DisableChargeAttackBox();
+
+
 		if (!BaseEnemy->GetMovementComponent()->IsFalling() && BaseEnemy->GetHitState() == EHitState::EHS_FALLFORWARD)
 		{
 			BaseEnemy->FrontGetUp();
@@ -60,4 +63,52 @@ void UBaseEnemyAnimInstance::EnableAI()
 		BaseEnemy->ResetAI();
 	}
 
+}
+
+void UBaseEnemyAnimInstance::DisableAttackCollision()
+{
+	if (BaseEnemy == nullptr)
+	{
+		BaseEnemy = Cast<ABaseEnemy>(TryGetPawnOwner());
+	}
+	if (BaseEnemy)
+	{
+		BaseEnemy->DisableAttackBoxes();
+	}
+}
+
+void UBaseEnemyAnimInstance::EnableRightHandCollision()
+{
+	if (BaseEnemy == nullptr)
+	{
+		BaseEnemy = Cast<ABaseEnemy>(TryGetPawnOwner());
+	}
+	if (BaseEnemy)
+	{
+		BaseEnemy->EnableRightAttackBox();
+	}
+}
+
+void UBaseEnemyAnimInstance::EnableLeftHandCollision()
+{
+	if (BaseEnemy == nullptr)
+	{
+		BaseEnemy = Cast<ABaseEnemy>(TryGetPawnOwner());
+	}
+	if (BaseEnemy)
+	{
+		BaseEnemy->EnableLeftAttackBox();
+	}
+}
+
+void UBaseEnemyAnimInstance::EnableJumpCollision()
+{
+	if (BaseEnemy == nullptr)
+	{
+		BaseEnemy = Cast<ABaseEnemy>(TryGetPawnOwner());
+	}
+	if (BaseEnemy)
+	{
+		BaseEnemy->EnableJumpAttackBox();
+	}
 }

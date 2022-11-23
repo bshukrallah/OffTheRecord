@@ -20,14 +20,17 @@ EBTNodeResult::Type UBTTask_EnemyAttack::ExecuteTask(UBehaviorTreeComponent& Own
 			switch (AIState)
 			{
 			case EAIState::EAS_ATTACKP1:
+				BaseEnemy->SetPowerLevel(150);
 				AttackChoice == 1 ? BaseEnemy->Attack("Punch1", 1.0f) : BaseEnemy->Attack("Punch2", 1.0f);
 				break;
 
 			case EAIState::EAS_ATTACKP2:
+				BaseEnemy->SetPowerLevel(400);
 				BaseEnemy->Attack("JumpAttack", 1.4f);
 				break;
 
 			case EAIState::EAS_ATTACKP3:
+				BaseEnemy->SetPowerLevel(600);
 				BaseEnemy->Charge();
 			}
 		}

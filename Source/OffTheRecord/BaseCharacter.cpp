@@ -34,7 +34,7 @@ ABaseCharacter::ABaseCharacter() :
 	//Attack Vars
 	bAttackButtonHeld(false), PowerUpCounter(100),
 	//Camera
-	bZoomCam(false), CurrentTargetLength(500.f), bDynamicRotataton(false), CurrentPitch(-35.f)
+	bZoomCam(false), CurrentTargetLength(500.f), bDynamicRotation(false), CurrentPitch(-35.f), DefaultDynamicYaw(0.f), DynamicYawSpeed(2.f)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -44,7 +44,7 @@ ABaseCharacter::ABaseCharacter() :
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 500.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
-	CameraBoom->SetRelativeRotation(FRotator(-35.f, 0.f, 0.f));
+	CameraBoom->SetRelativeRotation(FRotator(-35.f, 0.f, DefaultDynamicYaw));
 	CameraBoom->bDoCollisionTest = false;
 	CameraBoom->bInheritPitch = false;
 	CameraBoom->bEnableCameraLag = true;
@@ -86,19 +86,9 @@ ABaseCharacter::ABaseCharacter() :
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	CurrentDynamicYaw = DefaultDynamicYaw;
 	CameraControl->OnComponentBeginOverlap.AddDynamic(this, &ABaseCharacter::OnOverlap);
 	CameraControl->OnComponentEndOverlap.AddDynamic(this, &ABaseCharacter::OnEndOverlap);
-}
-
-void ABaseCharacter::DynamicCamera(float DeltaTime)
-{
-	bZoomCam == true ? CurrentTargetLength = FMath::FInterpTo(CurrentTargetLength, 300.f, DeltaTime, 3.f) : CurrentTargetLength = FMath::FInterpTo(CurrentTargetLength, 500.f, DeltaTime, 6.f);
-
-	bDynamicRotataton == true ? CurrentPitch = FMath::FInterpTo(CurrentPitch, -5.f, DeltaTime, 2.f) : CurrentPitch = FMath::FInterpTo(CurrentPitch, -35.f, DeltaTime, 5.f);
-
-	CameraBoom->TargetArmLength = CurrentTargetLength;
-	CameraBoom->SetRelativeRotation(FRotator(CurrentPitch, 0.f, 0.f));
 }
 
 // Called every frame
@@ -212,6 +202,14 @@ void ABaseCharacter::EquipWeapon(ABaseWeapon* Weapon)
 	}
 }
 
+void ABaseCharacter::SwapWeapon(ABaseWeapon* Weapon)
+{
+	if (Weapon) {
+		DropWeapon();
+		EquipWeapon(Weapon);
+	}
+}
+
 void ABaseCharacter::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor->GetClass()->IsChildOf(ABaseEnemy::StaticClass())) {
@@ -224,27 +222,45 @@ void ABaseCharacter::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	OverlapEnemyCounter(-1);
 }
 
-void ABaseCharacter::SwapWeapon(ABaseWeapon* Weapon)
-{
-	if (Weapon) {
-		DropWeapon();
-		EquipWeapon(Weapon);
-	}
-}
-
 void ABaseCharacter::OverlapEnemyCounter(int8 Amount)
 {
 	if (OverlappedWeaponCount + Amount <= 0) {
 		OverlappedWeaponCount = 0;
 		bZoomCam = false;
-		bDynamicRotataton = false;
+		bDynamicRotation = false;
 	}
 	else
 	{
 		OverlappedWeaponCount += Amount;
 		bZoomCam = true;
-		bDynamicRotataton = true;
+		if (!bDynamicRotation)
+		{
+			bDynamicRotation = true;
+			SetDynamicYaw();
+		} 
 	}
+}
+void ABaseCharacter::SetDynamicYaw()
+{
+	DynamicYawSpeed = .3;
+	TargetDynamicYaw = 125.f;
+}
+
+void ABaseCharacter::DynamicCamera(float DeltaTime)
+{
+	bZoomCam == true ? CurrentTargetLength = FMath::FInterpTo(CurrentTargetLength, 300.f, DeltaTime, 3.f) : CurrentTargetLength = FMath::FInterpTo(CurrentTargetLength, 500.f, DeltaTime, 6.f);
+
+	if (bDynamicRotation) {
+		CurrentPitch = FMath::FInterpTo(CurrentPitch, -5.f, DeltaTime, 2.f);
+		CurrentDynamicYaw = FMath::FInterpTo(CurrentDynamicYaw, TargetDynamicYaw, DeltaTime, DynamicYawSpeed);
+	}
+	else
+	{
+		CurrentPitch = FMath::FInterpTo(CurrentPitch, -35.f, DeltaTime, 5.f);
+		CurrentDynamicYaw = FMath::FInterpTo(CurrentDynamicYaw, DefaultDynamicYaw, DeltaTime, DynamicYawSpeed);
+	}
+	CameraBoom->TargetArmLength = CurrentTargetLength;
+	CameraBoom->SetRelativeRotation(FRotator(CurrentPitch, CurrentDynamicYaw, 0.f));
 }
 
 void ABaseCharacter::OverlapWeaponCounter(int8 Amount)
@@ -258,6 +274,7 @@ void ABaseCharacter::OverlapWeaponCounter(int8 Amount)
 		OverlappedWeaponCount += Amount;
 		bPickUpItem = true;
 	}
+
 }
 
 void ABaseCharacter::SetCharacterStatus(ECharacterState Status)
@@ -320,29 +337,54 @@ void ABaseCharacter::ComboSetup()
 void ABaseCharacter::EnableAttackBox()
 {
 	AttackBox->EnableCollision();
-	UE_LOG(LogTemp, Warning, TEXT("Attackbox Enabled"));
 }
 
 void ABaseCharacter::DisableAttackBox()
 {
 	AttackBox->DisableCollision();
-	UE_LOG(LogTemp, Warning, TEXT("Attackbox Disabled"));
 }
 
-void ABaseCharacter::KnockBack(FVector ForceDirection, int32 PowerLvl)
+void ABaseCharacter::KnockBack(FVector ForceDirection, FName Type, int32 PowerLvl)
 {
+	LaunchCharacter(FVector(ForceDirection.X * PowerLvl, ForceDirection.Y * PowerLvl, 200), false, false);
+	UBaseCharacterAnimInstance* AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+	DisableCharacter(true);
+	AnimInstance->Montage_Play(FallingMontage, 1.5f);
+	AnimInstance->Montage_JumpToSection(FName(Type));
 }
 
-void ABaseCharacter::BackGetUp()
+void ABaseCharacter::Recover()
 {
+	DisableCharacter(false);
+	UBaseCharacterAnimInstance* AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimInstance->SetComboFinal(false);
+	AnimInstance->Montage_Stop(0.2f, FallingMontage);
+	SetComboState(EComboState::ECS_NOCOMBO);
+	PowerUpCounter = 100;
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->SetPowerLevel(100);
+	}
 }
 
-void ABaseCharacter::FrontGetUp()
+void ABaseCharacter::DisableCharacter(bool disable)
 {
-}
-
-void ABaseCharacter::KnockForward(FVector ForceDirection, int32 PowerLvl)
-{
+	if (disable)
+	{
+		GetController()->SetIgnoreMoveInput(true);
+		GetCharacterMovement()->SetJumpAllowed(false);
+		SetCombatState(ECombatState::ECS_NOTREADY);
+		DisableAttackBox();
+		DisableHitBoxes();
+	}
+	else {
+		GetController()->SetIgnoreMoveInput(false);
+		GetCharacterMovement()->SetJumpAllowed(true);
+		if (CharacterState != ECharacterState::ECS_UNARMED) {
+			SetCombatState(ECombatState::ECS_READY);
+		}
+		EnableHitBoxes();
+	}
 }
 
 void ABaseCharacter::PowerUpWeapon()
@@ -453,4 +495,16 @@ void ABaseCharacter::PlayWeaponSwingSound()
 	case EComboState::ECS_COMBO2:
 		PowerUpCounter < 201 ? EquippedWeapon->PlayWeaponSwingSound(1) : EquippedWeapon->PlayWeaponSwingSound(2);
 	}
+}
+
+void ABaseCharacter::DisableHitBoxes()
+{
+	FrontHitBox->DisableCollision();
+	BackHitBox->DisableCollision();
+}
+
+void ABaseCharacter::EnableHitBoxes()
+{
+	FrontHitBox->EnableCollision();
+	BackHitBox->EnableCollision();
 }

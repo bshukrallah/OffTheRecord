@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "StatusEnums.h"
+#include "AttackTriggerComponent.h"
 #include "BaseEnemy.generated.h"
+
 
 UCLASS()
 class OFFTHERECORD_API ABaseEnemy : public ACharacter
@@ -30,6 +32,18 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		class UHitColliderComponent* TopHitBox;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+		class UAttackTriggerComponent* LeftAttackBox;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+		class UAttackTriggerComponent* RightAttackBox;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+		class UAttackTriggerComponent* ChargeAttackBox;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+		class UAttackTriggerComponent* JumpAttackBox;
+
 	//Character Hit Status
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		EHitState HitState;
@@ -41,12 +55,17 @@ private:
 		UAnimMontage* AttackMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		UAnimMontage* IdleMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		ECombatState CombatState;
 
 	class ABaseEnemyAIController* AIController;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		bool bCharge;
+
+	int32 PowerLevel;
 
 public:	
 	// Called every frame
@@ -55,19 +74,22 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+	UFUNCTION(BlueprintCallable, Category = "Actions")
+		void Idle(FName MontageSection);
+
+	UFUNCTION(BlueprintCallable, Category = "Actions")
 		void KnockBack(FVector ForceDirection, int32 PowerLvl);
 
-	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+	UFUNCTION(BlueprintCallable, Category = "Actions")
 		void BackGetUp();
 
-	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+	UFUNCTION(BlueprintCallable, Category = "Actions")
 		void FrontGetUp();
 
-	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+	UFUNCTION(BlueprintCallable, Category = "Actions")
 		void KnockForward(FVector ForceDirection, int32 PowerLvl);
 
-	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
+	UFUNCTION(BlueprintCallable, Category = "Actions")
 		void KnockDown();
 
 	UFUNCTION(BlueprintCallable)
@@ -98,7 +120,22 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void Charge();
 
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE void SetPowerLevel(int32 Power) { PowerLevel = Power; }
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE int32 GetPowerLevel() { return PowerLevel; }
+
 	void DisableHitBoxes();
 	void EnableHitBoxes();
+
+	void DisableAttackBoxes();
+
+	FORCEINLINE void EnableRightAttackBox() { RightAttackBox->EnableCollision(); }
+	FORCEINLINE void EnableLeftAttackBox() { LeftAttackBox->EnableCollision(); }
+	FORCEINLINE void EnableJumpAttackBox();
+
+	void DisableChargeAttackBox();
+	void EnableChargeAttackBox();
 
 };

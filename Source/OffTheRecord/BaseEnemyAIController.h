@@ -9,6 +9,8 @@
 UENUM(BlueprintType)
 enum class EAIState : uint8
 {
+	//Idle State
+	EAS_IDLE UMETA(DisplayName = "Idle"),
 	//Ready to attack
 	EAS_READY UMETA(DisplayName = "AI Ready"),
 	//Not allowed to attack
