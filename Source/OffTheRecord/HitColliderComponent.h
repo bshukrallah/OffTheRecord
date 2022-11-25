@@ -55,6 +55,9 @@ private:
 	//Hit Collider Type
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		EBoxTypes HitBoxType;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component Owner", meta = (AllowPrivateAccess = "true"))
+		class ABaseRecord* BaseRecord;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Collision Settings")

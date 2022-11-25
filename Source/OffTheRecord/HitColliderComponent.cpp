@@ -7,6 +7,9 @@
 #include "BaseCharacter.h"
 #include "BaseEnemy.h"
 #include "BaseWeapon.h"
+#include "BaseRecord.h"
+#include "EngineUtils.h"
+#include "Kismet/GameplayStatics.h"
 
 UHitColliderComponent::UHitColliderComponent() : bCollisionEnabled(false), HitBoxType(EBoxTypes::EBT_DEFAULT)
 {
@@ -18,6 +21,8 @@ void UHitColliderComponent::BeginPlay()
 	Super::BeginPlay();
 
 	EnableCollision();
+	
+	BaseRecord = Cast<ABaseRecord>(UGameplayStatics::GetActorOfClass(GetWorld(), ABaseRecord::StaticClass()));
 
 	if (this->GetOwner()->GetClass()->IsChildOf(ABaseCharacter::StaticClass()))
 	{
@@ -60,6 +65,11 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 					if (BaseEnemyOwner)
 					{
 						BaseEnemyOwner->KnockBack(LaunchDirection, WeaponPower);
+						if (BaseRecord)
+						{
+							BaseRecord->SetRecordSpeed(.009f);
+							UE_LOG(LogTemp, Warning, TEXT("Record Speed increase"));
+						}
 					}
 					if (BaseCharacterOwner)
 					{
@@ -71,6 +81,11 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 					if (BaseEnemyOwner)
 					{
 						BaseEnemyOwner->KnockForward(LaunchDirection, WeaponPower);
+						if (BaseRecord)
+						{
+							BaseRecord->SetRecordSpeed(.009f);
+							UE_LOG(LogTemp, Warning, TEXT("Record Speed increase"));
+						}
 					}
 					if (BaseCharacterOwner)
 					{

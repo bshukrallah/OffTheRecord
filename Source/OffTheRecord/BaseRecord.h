@@ -30,11 +30,11 @@ private:
 	//Record Enum Status
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
 		ERecordStatus RecordStatus;
+	UPROPERTY(EditAnywhere, Category = Movement)
+	float SpinValue;
 
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	UPROPERTY(EditAnywhere, Category = Movement)
-		float SpinValue;
+	void SetRecordSpeed(float Increment);
 };
