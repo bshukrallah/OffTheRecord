@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/AudioComponent.h"
 #include "BaseRecord.generated.h"
 
 //Record status
@@ -26,12 +27,16 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+	float SpinValue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Music)
+	class UAudioComponent* RecordAudioComponent;
+
 private:
 	//Record Enum Status
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
 		ERecordStatus RecordStatus;
-	UPROPERTY(EditAnywhere, Category = Movement)
-	float SpinValue;
 
 public:
 	// Called every frame

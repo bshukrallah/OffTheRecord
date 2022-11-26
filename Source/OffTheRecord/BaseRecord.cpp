@@ -1,5 +1,8 @@
 #include "BaseRecord.h"
 
+#include "BaseAmbientMusic.h"
+#include "Kismet/GameplayStatics.h"
+
 // Sets default values
 ABaseRecord::ABaseRecord()
 {
@@ -7,6 +10,8 @@ ABaseRecord::ABaseRecord()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	SpinValue = 0.f;
+
+	RecordAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Record Audio"));
 }
 
 // Called when the game starts or when spawned
@@ -22,10 +27,13 @@ void ABaseRecord::Tick(float DeltaTime)
 	FRotator NewRotation = FRotator(0.f, SpinValue, 0.f);
 	FQuat QuatRotation = FQuat(NewRotation);
 	AddActorLocalRotation(QuatRotation, false, 0, ETeleportType::None);
+	if (RecordAudioComponent)
+	{
+		RecordAudioComponent->SetPitchMultiplier(SpinValue);
+	}
 }
 
 void ABaseRecord::SetRecordSpeed(float Increment)
 {
 	SpinValue = SpinValue + Increment;
 }
-

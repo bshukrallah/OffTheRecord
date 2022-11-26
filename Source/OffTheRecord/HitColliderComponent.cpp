@@ -67,7 +67,7 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 						BaseEnemyOwner->KnockBack(LaunchDirection, WeaponPower);
 						if (BaseRecord)
 						{
-							BaseRecord->SetRecordSpeed(.009f);
+							BaseRecord->SetRecordSpeed(.05f);
 							UE_LOG(LogTemp, Warning, TEXT("Record Speed increase"));
 						}
 					}
@@ -83,7 +83,7 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 						BaseEnemyOwner->KnockForward(LaunchDirection, WeaponPower);
 						if (BaseRecord)
 						{
-							BaseRecord->SetRecordSpeed(.009f);
+							BaseRecord->SetRecordSpeed(.05f);
 							UE_LOG(LogTemp, Warning, TEXT("Record Speed increase"));
 						}
 					}
