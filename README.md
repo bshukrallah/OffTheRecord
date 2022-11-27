@@ -18,3 +18,8 @@ The majority of the assets were created from scratch with some notes:
 
 Cascadeur (free version) was utilized for some animations (https://cascadeur.com/)
 Mixamo Animations and Rig were utilized (https://www.mixamo.com/)
+
+Foot Step Sound - Windwalk Entertainment (Creative Commons 0) https://freesound.org/people/Windwalk_Entertainment/sounds/566685/
+Weapon Swing - qubodup (Creative Commons 0) https://freesound.org/people/qubodup/sounds/60013/
+Impact Sound - Huminaatio (Creative Commons 0) https://freesound.org/people/Huminaatio/sounds/390462/
+Impact Sound - KeenanAXQuinn (Creative Commons 0) https://freesound.org/people/KeenanAXQuinn/sounds/586891/
