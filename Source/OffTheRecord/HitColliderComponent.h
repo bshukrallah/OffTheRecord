@@ -53,8 +53,9 @@ private:
 		FString ComponentOwner;
 
 	//Hit Collider Type
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		EBoxTypes HitBoxType;
+
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Collision Settings")

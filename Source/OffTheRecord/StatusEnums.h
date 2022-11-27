@@ -63,7 +63,6 @@ UENUM(BlueprintType)
 enum class EBoxTypes : uint8
 {
 	//Ready to attack
-	EBT_DEFAULT UMETA(DisplayName = "Default"),
 	EBT_FRONT UMETA(DisplayName = "Front Side Hit Box"),
 	EBT_BACK UMETA(DisplayName = "Back Side Hit Box"),
 	EBT_TOP UMETA(DisplayName = "Top Hit Box"),

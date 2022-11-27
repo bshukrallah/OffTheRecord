@@ -53,11 +53,14 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		class UAttackTriggerComponent* AttackBox;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		class UHitColliderComponent* FrontHitBox;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		class UHitColliderComponent* BackHitBox;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		class USoundCue* ImpactSound;
 
 
 	//Type of Weapon
@@ -92,6 +95,7 @@ private:
 
 	void DynamicCamera(float DeltaTime);
 	void SetDynamicYaw();
+	void PlayImpactSound();
 
 	//Dynamic Camera
 	float CurrentTargetLength;
@@ -105,6 +109,10 @@ private:
 	bool bZoomCam;
 	bool bDynamicRotation;
 	int32 PowerUpCounter;
+
+	bool bDisableMovement;
+
+	FTimerHandle DisableCharacterTimer;
 
 public:	
 	// Called every frame
@@ -158,13 +166,20 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void DisableCharacter(bool disable);
 
+	UFUNCTION(BlueprintCallable)
+		void Death();
 
+	UFUNCTION(BlueprintCallable)
+		void Respawn();
+
+	FVector CameraLocation;
 
 	//Public Weapon functions called from anim instance
 	void PowerUpWeapon();
 	void FinishAttack();
 	void ComboHit();
 	void ComboMiss();
+	void JumpBoost(FVector ForceDirection);
 
 	void ComboAttack(class UBaseCharacterAnimInstance* AnimInstanceReference, FName MontageSection, float Speed, float MaxWalkSpeed);
 

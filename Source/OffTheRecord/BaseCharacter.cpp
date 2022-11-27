@@ -21,6 +21,7 @@
 #include "GameFramework/SpringArmComponent.h"
 
 #include "HitColliderComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "Sound/SoundCue.h"
 
@@ -34,7 +35,8 @@ ABaseCharacter::ABaseCharacter() :
 	//Attack Vars
 	bAttackButtonHeld(false), PowerUpCounter(100),
 	//Camera
-	bZoomCam(false), CurrentTargetLength(500.f), bDynamicRotation(false), CurrentPitch(-35.f), DefaultDynamicYaw(0.f), DynamicYawSpeed(2.f)
+	bZoomCam(false), CurrentTargetLength(500.f), bDynamicRotation(false), CurrentPitch(-35.f), DefaultDynamicYaw(0.f), DynamicYawSpeed(2.f),
+	bDisableMovement(false)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -96,7 +98,6 @@ void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	DynamicCamera(DeltaTime);
-
 }
 
 //Set up player input
@@ -145,6 +146,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 //Forward & backward movement
 void ABaseCharacter::ForwardMotion(float Value)
 {
+	if (bDisableMovement) return;
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		const FRotator Rotation{ Controller->GetControlRotation() };
@@ -158,6 +160,7 @@ void ABaseCharacter::ForwardMotion(float Value)
 //Left & right movement
 void ABaseCharacter::LateralMotion(float Value)
 {
+	if (bDisableMovement) return;
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		const FRotator Rotation{ Controller->GetControlRotation() };
@@ -244,6 +247,14 @@ void ABaseCharacter::SetDynamicYaw()
 {
 	DynamicYawSpeed = .3;
 	TargetDynamicYaw = 125.f;
+}
+
+void ABaseCharacter::PlayImpactSound()
+{
+	if (ImpactSound)
+	{
+		UGameplayStatics::PlaySound2D(this, ImpactSound);
+	}
 }
 
 void ABaseCharacter::DynamicCamera(float DeltaTime)
@@ -346,15 +357,26 @@ void ABaseCharacter::DisableAttackBox()
 
 void ABaseCharacter::KnockBack(FVector ForceDirection, FName Type, int32 PowerLvl)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Character Hit"));
+	GetWorldTimerManager().SetTimer(DisableCharacterTimer, this, &ABaseCharacter::Recover, .8f, false);
+	DisableCharacter(true);
+	PlayImpactSound();
 	LaunchCharacter(FVector(ForceDirection.X * PowerLvl, ForceDirection.Y * PowerLvl, 200), false, false);
 	UBaseCharacterAnimInstance* AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
-	DisableCharacter(true);
 	AnimInstance->Montage_Play(FallingMontage, 1.5f);
 	AnimInstance->Montage_JumpToSection(FName(Type));
+
 }
 
 void ABaseCharacter::Recover()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Character Recover"));
+	if (GetWorldTimerManager().TimerExists(DisableCharacterTimer))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Timer was Run"));
+		GetWorldTimerManager().ClearTimer(DisableCharacterTimer);
+		DisableCharacterTimer.Invalidate();
+	}
 	DisableCharacter(false);
 	UBaseCharacterAnimInstance* AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInstance->SetComboFinal(false);
@@ -371,15 +393,20 @@ void ABaseCharacter::DisableCharacter(bool disable)
 {
 	if (disable)
 	{
-		GetController()->SetIgnoreMoveInput(true);
-		GetCharacterMovement()->SetJumpAllowed(false);
+		UE_LOG(LogTemp, Warning, TEXT("Character Disabled"));
 		SetCombatState(ECombatState::ECS_NOTREADY);
+		//GetController()->SetIgnoreMoveInput(true);
+		bDisableMovement = true;
+		GetCharacterMovement()->SetJumpAllowed(false);
 		DisableAttackBox();
 		DisableHitBoxes();
 	}
 	else {
-		GetController()->SetIgnoreMoveInput(false);
+		UE_LOG(LogTemp, Warning, TEXT("Character Enabled"));
+		//GetController()->SetIgnoreMoveInput(false);
+		bDisableMovement = false;
 		GetCharacterMovement()->SetJumpAllowed(true);
+		GetCharacterMovement()->MaxWalkSpeed = 600.0f;
 		if (CharacterState != ECharacterState::ECS_UNARMED) {
 			SetCombatState(ECombatState::ECS_READY);
 		}
@@ -387,10 +414,28 @@ void ABaseCharacter::DisableCharacter(bool disable)
 	}
 }
 
+void ABaseCharacter::Death()
+{
+
+	CameraLocation = CameraBoom->GetRelativeLocation();
+	DropWeapon();
+	FTimerHandle CharacterRespawnTimer;
+	GetWorldTimerManager().SetTimer(CharacterRespawnTimer, this, &ABaseCharacter::Respawn, 1.5f, false);
+	CameraBoom->CameraLagSpeed = .01f;
+}
+
+void ABaseCharacter::Respawn()
+{
+	Recover();
+	SetActorLocation(FVector(0.0f, 0.0f, 45.f));
+	CameraBoom->CameraLagSpeed = 2.0f;
+}
+
 void ABaseCharacter::PowerUpWeapon()
 {
 	UBaseCharacterAnimInstance* AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 	if (!EquippedWeapon) { return; }
+	if (CombatState == ECombatState::ECS_NOTREADY) { return; }
 	if (bAttackButtonHeld)
 	{
 		if (PowerUpCounter == 450) 
@@ -415,6 +460,7 @@ void ABaseCharacter::PowerUpWeapon()
 
 void ABaseCharacter::FinishAttack()
 {
+	DisableCharacter(false);
 	UBaseCharacterAnimInstance* AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInstance->Montage_Stop(0.2f, AttackMontage);
 	AnimInstance->SetComboFinal(false);
@@ -449,6 +495,11 @@ void ABaseCharacter::ComboHit()
 void ABaseCharacter::ComboMiss()
 {
 	SetComboState(EComboState::ECS_NOCOMBO);
+}
+
+void ABaseCharacter::JumpBoost(FVector ForceDirection)
+{
+	LaunchCharacter(FVector(ForceDirection.X, ForceDirection.Y, 1500), false, false);
 }
 
 void ABaseCharacter::ComboAttack(UBaseCharacterAnimInstance* AnimInstanceReference, FName MontageSection, float Speed, float MaxWalkSpeed)

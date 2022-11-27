@@ -25,12 +25,12 @@ EBTNodeResult::Type UBTTask_EnemyAttack::ExecuteTask(UBehaviorTreeComponent& Own
 				break;
 
 			case EAIState::EAS_ATTACKP2:
-				BaseEnemy->SetPowerLevel(400);
+				BaseEnemy->SetPowerLevel(300);
 				BaseEnemy->Attack("JumpAttack", 1.4f);
 				break;
 
 			case EAIState::EAS_ATTACKP3:
-				BaseEnemy->SetPowerLevel(600);
+				BaseEnemy->SetPowerLevel(500);
 				BaseEnemy->Charge();
 			}
 		}

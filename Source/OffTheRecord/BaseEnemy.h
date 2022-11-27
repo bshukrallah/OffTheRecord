@@ -23,14 +23,15 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-		class UHitColliderComponent* FrontHitBox;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-		class UHitColliderComponent* BackHitBox;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (AllowPrivateAccess = "true"))
+		class UHitColliderComponent* FrontHitTriggerBox;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-		class UHitColliderComponent* TopHitBox;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (AllowPrivateAccess = "true"))
+		class UHitColliderComponent* BackHitTriggerBox;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (AllowPrivateAccess = "true"))
+		class UHitColliderComponent* TopHitTriggerBox;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		class UAttackTriggerComponent* LeftAttackBox;
@@ -43,6 +44,15 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 		class UAttackTriggerComponent* JumpAttackBox;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+		class UWeaponSpawnComponent* WeaponSpawner;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		class USoundCue* ImpactSound;
+
+	UMaterialInterface* EnemyMat;
+	UMaterialInstanceDynamic* DynMat;
 
 	//Character Hit Status
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
@@ -62,10 +72,10 @@ private:
 
 	class ABaseEnemyAIController* AIController;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
-		bool bCharge;
-
 	int32 PowerLevel;
+	float CurrentMatColor;
+
+	void PlayImpactSound();
 
 public:	
 	// Called every frame
@@ -91,6 +101,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 		void KnockDown();
+
+	UFUNCTION(BlueprintCallable, Category = "Actions")
+		void MatSwap(bool Swap, float DeltaTime);
 
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE EHitState GetHitState() const { return HitState; }
@@ -121,10 +134,18 @@ public:
 		void Charge();
 
 	UFUNCTION(BlueprintCallable)
+		void Death();
+
+	void DestroyActor();
+
+	UFUNCTION(BlueprintCallable)
 		FORCEINLINE void SetPowerLevel(int32 Power) { PowerLevel = Power; }
 
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE int32 GetPowerLevel() { return PowerLevel; }
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		bool bCharge;
 
 	void DisableHitBoxes();
 	void EnableHitBoxes();
@@ -134,6 +155,8 @@ public:
 	FORCEINLINE void EnableRightAttackBox() { RightAttackBox->EnableCollision(); }
 	FORCEINLINE void EnableLeftAttackBox() { LeftAttackBox->EnableCollision(); }
 	FORCEINLINE void EnableJumpAttackBox();
+
+	UWeaponSpawnComponent* GetWeaponSpawner();
 
 	void DisableChargeAttackBox();
 	void EnableChargeAttackBox();

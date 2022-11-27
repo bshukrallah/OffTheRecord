@@ -3,12 +3,12 @@
 
 #include "HitColliderComponent.h"
 #include "AttackTriggerComponent.h"
-#include "Math/Color.h"
 #include "BaseCharacter.h"
 #include "BaseEnemy.h"
+#include "WeaponSpawnComponent.h"
 #include "BaseWeapon.h"
 
-UHitColliderComponent::UHitColliderComponent() : bCollisionEnabled(false), HitBoxType(EBoxTypes::EBT_DEFAULT)
+UHitColliderComponent::UHitColliderComponent() : bCollisionEnabled(false)
 {
 
 }
@@ -37,18 +37,16 @@ void UHitColliderComponent::BeginPlay()
 		ComponentOwner = FString(BaseEnemyOwner->GetName());
 	}
 
-	if (ComponentOwner.Len() > 0) {
-		UE_LOG(LogTemp, Warning, TEXT("Hit Collider %s --- Has Owner: %s"), *FString(this->GetName()), *ComponentOwner);
-	}
-
 	this->OnComponentBeginOverlap.AddDynamic(this, &UHitColliderComponent::OnOverlap);
 	this->OnComponentEndOverlap.AddDynamic(this, &UHitColliderComponent::OnEndOverlap);
 }
 
 void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+
 	if (OtherComp->GetClass()->IsChildOf(UHitColliderComponent::StaticClass()))
 	{
+
 		return;
 	}
 	if (OtherActor->GetClass()->IsChildOf(ABaseWeapon::StaticClass()))
@@ -63,7 +61,7 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 				{
 					if (BaseEnemyOwner)
 					{
-						BaseEnemyOwner->KnockBack(LaunchDirection, WeaponPower*5);
+						BaseEnemyOwner->KnockBack(LaunchDirection, WeaponPower*8);
 					}
 					if (BaseCharacterOwner)
 					{
@@ -74,7 +72,7 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 				{
 					if (BaseEnemyOwner)
 					{
-						BaseEnemyOwner->KnockForward(LaunchDirection, WeaponPower*6);
+						BaseEnemyOwner->KnockForward(LaunchDirection, WeaponPower*9);
 					}
 					if (BaseCharacterOwner)
 					{
@@ -93,9 +91,12 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 			{
 				if (HitBoxType == EBoxTypes::EBT_TOP)
 				{
+					FVector LaunchDirection((OtherActor->GetActorLocation() - this->GetOwner()->GetActorLocation()).GetSafeNormal() * -1);
 					if (BaseEnemyOwner)
 					{
 						BaseEnemyOwner->KnockDown();
+						BaseCharacter->JumpBoost(LaunchDirection);
+						BaseEnemyOwner->GetWeaponSpawner()->SpawnWeapon();
 					}
 					if (BaseCharacterOwner)
 					{
@@ -117,16 +118,22 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 				{
 					if (BaseCharacterOwner)
 					{
-						UE_LOG(LogTemp, Warning, TEXT("This Object: %s %s --- Collision with: %s %s"), *FString(OverlappedComponent->GetOwner()->GetName()), *FString(OverlappedComponent->GetName()), *FString(OtherComp->GetName()), *FString(OtherComp->GetOwner()->GetName()));
 						BaseCharacterOwner->KnockBack(LaunchDirection, "FallBack", BaseEnemy->GetPowerLevel()*5);
+					}
+					if (BaseEnemyOwner && BaseEnemy->bCharge)
+					{
+						BaseEnemyOwner->KnockBack(LaunchDirection, BaseEnemy->GetPowerLevel() * 5);
 					}
 				}
 				if (HitBoxType == EBoxTypes::EBT_BACK)
 				{
 					if (BaseCharacterOwner)
 					{
-						UE_LOG(LogTemp, Warning, TEXT("This Object: %s %s --- Collision with: %s %s"), *FString(OverlappedComponent->GetOwner()->GetName()), *FString(OverlappedComponent->GetName()), *FString(OtherComp->GetName()), *FString(OtherComp->GetOwner()->GetName()));
 						BaseCharacterOwner->KnockBack(LaunchDirection, "FallForward", BaseEnemy->GetPowerLevel()*6);
+					}
+					if (BaseEnemyOwner && BaseEnemy->bCharge)
+					{
+						BaseEnemyOwner->KnockForward(LaunchDirection, BaseEnemy->GetPowerLevel() * 6);
 					}
 				}
 			}

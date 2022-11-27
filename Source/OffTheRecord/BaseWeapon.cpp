@@ -10,6 +10,7 @@
 
 #include "Components/AudioComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/StaticMeshComponent.h"
 
@@ -46,6 +47,7 @@ void ABaseWeapon::BeginPlay()
 	if (WeaponStatus == EWeaponStatus::EWS_WEAPONFALLING)
 	{
 		SpawnWeapon();
+		UE_LOG(LogTemp, Warning, TEXT("WEAPON SPAWNED"));
 	}
 
 	if (WeaponSwingAC && WeaponSwingCue) 
@@ -60,10 +62,10 @@ void ABaseWeapon::BeginPlay()
 void ABaseWeapon::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 
-	if (OtherActor)
+	if (OtherActor->GetClass()->IsChildOf(ABaseCharacter::StaticClass()))
 	{
 		ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(OtherActor);
-		if (BaseCharacter)
+		if (OtherComp == BaseCharacter->GetCapsuleComponent())
 		{
 			BaseCharacter->OverlapWeaponCounter(1);
 			if(BaseCharacter->bPickUpItem)
@@ -113,6 +115,7 @@ void ABaseWeapon::SetWeaponStatus(EWeaponStatus Status)
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 
 		PickUpTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		PickUpTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -130,6 +133,11 @@ void ABaseWeapon::SetWeaponStatus(EWeaponStatus Status)
 		PickUpTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		PickUpTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+}
+
+void ABaseWeapon::KillWeapon()
+{
+	this->Destroy();
 }
 
 // Called every frame
@@ -159,12 +167,12 @@ void ABaseWeapon::DropWeapon()
 	WeaponMesh->AddImpulse(ImpulseDirection*3000);
 
 	FTimerHandle FallingWeaponTimer;
-	GetWorldTimerManager().SetTimer(FallingWeaponTimer, this, &ABaseWeapon::StopFalling, FallingWeaponTime-.5f, false);
+	GetWorldTimerManager().SetTimer(FallingWeaponTimer, this, &ABaseWeapon::KillWeapon, FallingWeaponTime-.5f, false);
 }
 
 void ABaseWeapon::SpawnWeapon()
 {
-	FVector ImpulseDirection(0.f, 0.f, 5'000.f);
+	FVector ImpulseDirection(0.f, 0.f, 1'000.f);
 	WeaponMesh->AddImpulse(ImpulseDirection);
 	bOrientWeapon = true;
 	FTimerHandle FallingWeaponTimer;
