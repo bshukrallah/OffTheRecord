@@ -120,7 +120,7 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 					{
 						BaseCharacterOwner->KnockBack(LaunchDirection, "FallBack", BaseEnemy->GetPowerLevel()*5);
 					}
-					if (BaseEnemyOwner && BaseEnemy->bCharge)
+					if (BaseEnemyOwner && BaseEnemy->bCharge && (BaseEnemy != BaseEnemyOwner))
 					{
 						BaseEnemyOwner->KnockBack(LaunchDirection, BaseEnemy->GetPowerLevel() * 5);
 					}
@@ -131,7 +131,7 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 					{
 						BaseCharacterOwner->KnockBack(LaunchDirection, "FallForward", BaseEnemy->GetPowerLevel()*6);
 					}
-					if (BaseEnemyOwner && BaseEnemy->bCharge)
+					if (BaseEnemyOwner && BaseEnemy->bCharge && (BaseEnemy != BaseEnemyOwner))
 					{
 						BaseEnemyOwner->KnockForward(LaunchDirection, BaseEnemy->GetPowerLevel() * 6);
 					}

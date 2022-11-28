@@ -36,7 +36,8 @@ ABaseCharacter::ABaseCharacter() :
 	bAttackButtonHeld(false), PowerUpCounter(100),
 	//Camera
 	bZoomCam(false), CurrentTargetLength(500.f), bDynamicRotation(false), CurrentPitch(-35.f), DefaultDynamicYaw(0.f), DynamicYawSpeed(2.f),
-	bDisableMovement(false)
+	bDisableMovement(false),
+	bGamePaused(false)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -91,6 +92,28 @@ void ABaseCharacter::BeginPlay()
 	CurrentDynamicYaw = DefaultDynamicYaw;
 	CameraControl->OnComponentBeginOverlap.AddDynamic(this, &ABaseCharacter::OnOverlap);
 	CameraControl->OnComponentEndOverlap.AddDynamic(this, &ABaseCharacter::OnEndOverlap);
+
+	if (StartingWeapon) {
+		StartWeapon = GetWorld()->SpawnActor<AActor>(StartingWeapon);
+		const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("Hand_RSocket"));
+		if (HandSocket)
+		{
+			HandSocket->AttachActor(StartWeapon, GetMesh());
+		}
+	}
+}
+
+void ABaseCharacter::Pause()
+{
+	if (bGamePaused) {
+		UGameplayStatics::SetGamePaused(GetWorld(), false);
+		bGamePaused = false;
+	}
+	else
+	{
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+		bGamePaused = true;
+	}
 }
 
 // Called every frame
@@ -120,6 +143,9 @@ void ABaseCharacter::SetupControls()
 		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("AttackSetup", EKeys::LeftMouseButton));
 		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("AttackSetup", EKeys::Gamepad_FaceButton_Left));
 
+		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Pause", EKeys::Q));
+		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Pause", EKeys::Q));
+
 		bindingsAdded = true;
 	}
 }
@@ -140,6 +166,9 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction("AttackSetup", IE_Pressed, this, &ABaseCharacter::AttackSetup);
 	PlayerInputComponent->BindAction("AttackSetup", IE_Released, this, &ABaseCharacter::AttackRelease);
+
+	FInputActionBinding& toggle = InputComponent->BindAction("Pause", IE_Pressed, this, &ABaseCharacter::Pause);
+	toggle.bExecuteWhenPaused = true;
 }
 
 

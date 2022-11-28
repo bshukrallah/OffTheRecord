@@ -62,7 +62,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		class USoundCue* ImpactSound;
 
-
 	//Type of Weapon
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		EWeaponType WeaponType;
@@ -76,11 +75,16 @@ private:
 		EComboState ComboState;
 
 	//Currently equipped weapon
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		ABaseWeapon* EquippedWeapon;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<class AActor> StartingWeapon;
+
+	class AActor* StartWeapon;
+
 	//Character Battle Status
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 		ECombatState CombatState;
 
 	//Num of overlapped weapons
@@ -111,6 +115,9 @@ private:
 	int32 PowerUpCounter;
 
 	bool bDisableMovement;
+	bool bGamePaused;
+
+	void Pause();
 
 	FTimerHandle DisableCharacterTimer;
 
