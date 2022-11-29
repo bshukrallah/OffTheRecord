@@ -67,7 +67,7 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 						BaseEnemyOwner->KnockBack(LaunchDirection, WeaponPower);
 						if (BaseRecord)
 						{
-							BaseRecord->SetRecordSpeed(.05f);
+							BaseRecord->SetRecordSpeed(2);
 							UE_LOG(LogTemp, Warning, TEXT("Record Speed increase"));
 						}
 					}
@@ -83,7 +83,7 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 						BaseEnemyOwner->KnockForward(LaunchDirection, WeaponPower);
 						if (BaseRecord)
 						{
-							BaseRecord->SetRecordSpeed(.05f);
+							BaseRecord->SetRecordSpeed(2);
 							UE_LOG(LogTemp, Warning, TEXT("Record Speed increase"));
 						}
 					}
@@ -141,17 +141,16 @@ void UHitColliderComponent::OnOverlap(UPrimitiveComponent* OverlappedComponent, 
 
 	//Temp Logging
 	if (EquippedWeapon) {
-		UE_LOG(LogTemp, Warning, TEXT("Weapon Hit"));
+
 	}
 	if (BaseCharacter) {
-		UE_LOG(LogTemp, Warning, TEXT("Character Hit"));
+
 	}
-	UE_LOG(LogTemp, Warning, TEXT("This Object: %s --- Collision with: %s"), *FString(OverlappedComponent->GetName()), * FString(OtherComp->GetName()));
 	if (OtherActor->GetClass()->IsChildOf(ABaseEnemy::StaticClass())) {
-		UE_LOG(LogTemp, Warning, TEXT("Collide with Base Enemy"));
+
 	}
 	if (OtherActor->GetClass()->IsChildOf(ABaseCharacter::StaticClass())) {
-		UE_LOG(LogTemp, Warning, TEXT("Collide with Base Character"));
+
 	}
 
 }

@@ -28,10 +28,26 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
-	float SpinValue;
+	uint8 SpinValue;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Music)
 	class UAudioComponent* RecordAudioComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound, meta = (AllowPrivateAccess = "true"))
+	class USoundCue* RecordAudioCue;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	uint8 MusicSelect;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	uint8 CurrentMusicSelect;
+
+	void GetMusicSelection();
+
+	UFUNCTION()
+	void GetPlaybackPerc(const USoundWave* PlayingSoundWave, const float PlaybackPercent);
+
+	float CurrentAudioPercentage;
 
 private:
 	//Record Enum Status
@@ -41,5 +57,5 @@ private:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void SetRecordSpeed(float Increment);
+	void SetRecordSpeed(int Increment);
 };
