@@ -3,3 +3,16 @@
 
 #include "OffTheRecordGameModeBase.h"
 
+
+AOffTheRecordGameModeBase::AOffTheRecordGameModeBase()
+{
+
+
+}
+
+
+void AOffTheRecordGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();
+}
+

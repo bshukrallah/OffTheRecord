@@ -136,3 +136,15 @@ void UBaseCharacterAnimInstance::DisableWeaponCollision()
 	}
 }
 
+void UBaseCharacterAnimInstance::Recover()
+{
+	if (BaseCharacter == nullptr)
+	{
+		BaseCharacter = Cast<ABaseCharacter>(TryGetPawnOwner());
+	}
+	if (BaseCharacter)
+	{
+		BaseCharacter->Recover();
+	}
+}
+

@@ -28,6 +28,7 @@ enum class ECombatState : uint8
 	ECS_NOTREADY UMETA(DisplayName = "Not Ready to Attack"),
 	//Currently attacking
 	ECS_ATTACKING UMETA(DisplayName = "Attacking"),
+	ECS_CHARGING UMETA(DisplayName = "Charging"),
 
 	ECS_MAX UMETA(DisplayName = "DefaultMax")
 };
@@ -62,7 +63,6 @@ UENUM(BlueprintType)
 enum class EBoxTypes : uint8
 {
 	//Ready to attack
-	EBT_DEFAULT UMETA(DisplayName = "Default"),
 	EBT_FRONT UMETA(DisplayName = "Front Side Hit Box"),
 	EBT_BACK UMETA(DisplayName = "Back Side Hit Box"),
 	EBT_TOP UMETA(DisplayName = "Top Hit Box"),
