@@ -67,6 +67,8 @@ private:
 
 	float FallingWeaponTime;
 
+	void KillWeapon();
+
 	bool bOrientWeapon;
 	int32 PowerUpLevel;
 

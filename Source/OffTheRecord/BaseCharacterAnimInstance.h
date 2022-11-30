@@ -83,4 +83,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void DisableWeaponCollision();
 
+	UFUNCTION(BlueprintCallable)
+		void Recover();
+
 };

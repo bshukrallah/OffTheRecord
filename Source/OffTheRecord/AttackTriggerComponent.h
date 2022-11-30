@@ -36,5 +36,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Collision Settings")
 		void EnableCollision();
+
+	FORCEINLINE bool bIsCollisionEnabled() { return bCollisionEnabled; }
 	
 };
