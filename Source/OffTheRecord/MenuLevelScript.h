@@ -28,7 +28,13 @@ protected:
 
 
 private:
+	//Reference to the Overall HUD Overlay Class
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Widgets, meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<class UUserWidget> MainMenuClass;
 
+	//Variable to holds the HUD overlay widget after creating it
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widgets, meta = (AllowPrivateAccess = "true"))
+		class UUserWidget* MainMenu;
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -36,5 +42,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		AActor* GetCharacterCam();
+
+
 
 };

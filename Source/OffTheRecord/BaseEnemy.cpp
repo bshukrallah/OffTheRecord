@@ -10,6 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "OffTheRecordGameModeBase.h"
 #include "HitColliderComponent.h"
 #include "Sound/SoundCue.h"
 #include "WeaponSpawnComponent.h"
@@ -60,7 +61,7 @@ void ABaseEnemy::BeginPlay()
 	DynMat = UMaterialInstanceDynamic::Create(EnemyMat, this);
 	GetMesh()->SetMaterial(1, DynMat);
 	DynMat->SetVectorParameterValue(TEXT("EnemyColor"), FVector(CurrentMatColor, 0.f, 0.f));
-
+	OTRGameMode = Cast<AOffTheRecordGameModeBase>(UGameplayStatics::GetGameMode(this));
 	AIController = Cast<ABaseEnemyAIController>(GetController());
 	if (AIController)
 	{
@@ -217,6 +218,9 @@ void ABaseEnemy::Charge()
 
 void ABaseEnemy::Death()
 {
+	if (OTRGameMode) {
+		OTRGameMode->IncreaseScore();
+	}
 	UBaseEnemyAnimInstance* AnimInstance = Cast<UBaseEnemyAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance) {
 		AnimInstance->Montage_Play(FallingMontage, 1.0);

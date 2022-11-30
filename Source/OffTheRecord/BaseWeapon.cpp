@@ -49,7 +49,6 @@ void ABaseWeapon::BeginPlay()
 	if (WeaponStatus == EWeaponStatus::EWS_WEAPONFALLING)
 	{
 		SpawnWeapon();
-		UE_LOG(LogTemp, Warning, TEXT("WEAPON SPAWNED"));
 	}
 
 	if (WeaponSwingAC && WeaponSwingCue) 

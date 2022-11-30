@@ -22,8 +22,10 @@
 
 #include "HitColliderComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 #include "Sound/SoundCue.h"
+#include "OffTheRecordGameModeBase.h"
 
 
 // Sets default values
@@ -90,6 +92,7 @@ void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	CurrentDynamicYaw = DefaultDynamicYaw;
+	OTRGameMode = Cast<AOffTheRecordGameModeBase>(UGameplayStatics::GetGameMode(this));
 	CameraControl->OnComponentBeginOverlap.AddDynamic(this, &ABaseCharacter::OnOverlap);
 	CameraControl->OnComponentEndOverlap.AddDynamic(this, &ABaseCharacter::OnEndOverlap);
 
@@ -143,8 +146,8 @@ void ABaseCharacter::SetupControls()
 		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("AttackSetup", EKeys::LeftMouseButton));
 		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("AttackSetup", EKeys::Gamepad_FaceButton_Left));
 
-		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Pause", EKeys::Q));
-		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Pause", EKeys::Q));
+		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Pause", EKeys::P));
+		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Pause", EKeys::P));
 
 		bindingsAdded = true;
 	}
@@ -386,7 +389,6 @@ void ABaseCharacter::DisableAttackBox()
 
 void ABaseCharacter::KnockBack(FVector ForceDirection, FName Type, int32 PowerLvl)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Character Hit"));
 	GetWorldTimerManager().SetTimer(DisableCharacterTimer, this, &ABaseCharacter::Recover, .8f, false);
 	DisableCharacter(true);
 	PlayImpactSound();
@@ -399,10 +401,8 @@ void ABaseCharacter::KnockBack(FVector ForceDirection, FName Type, int32 PowerLv
 
 void ABaseCharacter::Recover()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Character Recover"));
 	if (GetWorldTimerManager().TimerExists(DisableCharacterTimer))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Timer was Run"));
 		GetWorldTimerManager().ClearTimer(DisableCharacterTimer);
 		DisableCharacterTimer.Invalidate();
 	}
@@ -422,7 +422,6 @@ void ABaseCharacter::DisableCharacter(bool disable)
 {
 	if (disable)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Character Disabled"));
 		SetCombatState(ECombatState::ECS_NOTREADY);
 		//GetController()->SetIgnoreMoveInput(true);
 		bDisableMovement = true;
@@ -431,7 +430,6 @@ void ABaseCharacter::DisableCharacter(bool disable)
 		DisableHitBoxes();
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Character Enabled"));
 		//GetController()->SetIgnoreMoveInput(false);
 		bDisableMovement = false;
 		GetCharacterMovement()->SetJumpAllowed(true);
@@ -445,7 +443,7 @@ void ABaseCharacter::DisableCharacter(bool disable)
 
 void ABaseCharacter::Death()
 {
-
+	OTRGameMode->SetLives(-1);
 	CameraLocation = CameraBoom->GetRelativeLocation();
 	DropWeapon();
 	FTimerHandle CharacterRespawnTimer;

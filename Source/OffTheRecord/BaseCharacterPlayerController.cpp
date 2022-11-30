@@ -3,3 +3,10 @@
 
 #include "BaseCharacterPlayerController.h"
 
+void ABaseCharacterPlayerController::SetPlayerEnabledState(bool playerEnabled)
+{
+	if (playerEnabled) {
+		GetPawn()->EnableInput(this);
+	}
+	else GetPawn()->DisableInput(this);
+}

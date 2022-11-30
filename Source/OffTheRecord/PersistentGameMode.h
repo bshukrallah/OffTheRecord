@@ -4,24 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
-#include "MenuGameMode.generated.h"
+#include "PersistentGameMode.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class OFFTHERECORD_API AMenuGameMode : public AGameMode
+class OFFTHERECORD_API APersistentGameMode : public AGameMode
 {
 	GENERATED_BODY()
-
-public:
-	AMenuGameMode();
-
-private:
-
-
-protected:
-
-private:
 	
 };

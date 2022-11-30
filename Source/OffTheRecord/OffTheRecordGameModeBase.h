@@ -23,6 +23,46 @@ protected:
 
 private:
 
+	int32 lives;
+	int32 score;
+	int32 ComboCounter;
+
 public:
+
+	UFUNCTION(BlueprintCallable)
+		void StartGame();
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void GameOver();
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE int32 GetLives() { return lives; }
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE int32 GetScore() { return score; }
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE int32 GetCombo() { return ComboCounter; }
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE void ResetComboCounter() { ComboCounter = 0; }
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE void ResetScore() { score = 0; }
+
+	UFUNCTION(BlueprintCallable)
+		FORCEINLINE void ResetLives() { lives = 3; }
+
+	UFUNCTION(BlueprintCallable)
+		void IncreaseScore();
+
+	UFUNCTION(BlueprintCallable)
+		void SetLives(int32 life);
+
+	UFUNCTION(BlueprintCallable)
+		void Setup();
+
+	UFUNCTION(BlueprintCallable)
+		void SpawnEnemy();
 	
 };

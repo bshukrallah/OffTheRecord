@@ -2,6 +2,8 @@
 
 
 #include "LevelController.h"
+#include "SpawnController.h"
+#include "BaseCharacter.h"
 
 
 ALevelController::ALevelController()
@@ -10,18 +12,17 @@ ALevelController::ALevelController()
 
 void ALevelController::BeginPlay()
 {
-	//WorldCamera = GetWorld()->SpawnActor<AWorldCamera>();
-	/*
-	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	if (PlayerPawn) {
-		ABaseCharacterPlayerController* PlayerController = Cast<ABaseCharacterPlayerController>(PlayerPawn->GetController());
-		if (PlayerController) {
-			if (WorldCamera)
-			{
-				PlayerController->SetViewTargetWithBlend(Cast<AActor>(WorldCamera->GetCam()));
-				
 
-			}
-		}
-	}*/
 }
+
+void ALevelController::SpawnEnemy()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Spawn LS"));
+	SpawnComponent->SpawnEnemy();
+}
+
+ABaseCharacter* ALevelController::GetCharacter()
+{
+	return BaseCharacter;
+}
+

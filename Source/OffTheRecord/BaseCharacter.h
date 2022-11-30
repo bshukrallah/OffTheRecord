@@ -121,6 +121,8 @@ private:
 
 	FTimerHandle DisableCharacterTimer;
 
+	class AOffTheRecordGameModeBase* OTRGameMode;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
