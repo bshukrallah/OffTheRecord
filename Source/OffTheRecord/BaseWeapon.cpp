@@ -43,11 +43,12 @@ void ABaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
+
 	SetWeaponStatus(EWeaponStatus::EWS_WEAPONFALLING);
+
 	if (WeaponStatus == EWeaponStatus::EWS_WEAPONFALLING)
 	{
 		SpawnWeapon();
-		UE_LOG(LogTemp, Warning, TEXT("WEAPON SPAWNED"));
 	}
 
 	if (WeaponSwingAC && WeaponSwingCue) 
@@ -87,8 +88,6 @@ void ABaseWeapon::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 		}
 	}
 }
-
-
 
 void ABaseWeapon::SetWeaponStatus(EWeaponStatus Status)
 {
@@ -144,7 +143,7 @@ void ABaseWeapon::KillWeapon()
 void ABaseWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+
 	if (bOrientWeapon) {
 		FRotator MeshRotation{ 0.f, GetWeaponMesh()->GetComponentRotation().Yaw, 180.f};
 		GetWeaponMesh()->SetWorldRotation(MeshRotation, false, nullptr, ETeleportType::TeleportPhysics);
@@ -172,12 +171,11 @@ void ABaseWeapon::DropWeapon()
 
 void ABaseWeapon::SpawnWeapon()
 {
-	FVector ImpulseDirection(0.f, 0.f, 1'000.f);
-	WeaponMesh->AddImpulse(ImpulseDirection);
-	bOrientWeapon = true;
-	FTimerHandle FallingWeaponTimer;
-	GetWorldTimerManager().SetTimer(FallingWeaponTimer, this, &ABaseWeapon::StopFalling, FallingWeaponTime, false);
-
+		FVector ImpulseDirection(0.f, 0.f, 1'000.f);
+		WeaponMesh->AddImpulse(ImpulseDirection);
+		bOrientWeapon = true;
+		FTimerHandle FallingWeaponTimer;
+		GetWorldTimerManager().SetTimer(FallingWeaponTimer, this, &ABaseWeapon::StopFalling, FallingWeaponTime, false);
 }
 
 void ABaseWeapon::PlayWeaponSwingSound(int8 type)

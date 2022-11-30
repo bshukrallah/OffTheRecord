@@ -13,5 +13,6 @@ UCLASS()
 class OFFTHERECORD_API ABaseCharacterPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+public:
+	void SetPlayerEnabledState(bool playerEnabled);
 };

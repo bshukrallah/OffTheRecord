@@ -23,3 +23,5 @@ Foot Step Sound - Windwalk Entertainment (Creative Commons 0) https://freesound.
 Weapon Swing - qubodup (Creative Commons 0) https://freesound.org/people/qubodup/sounds/60013/
 Impact Sound - Huminaatio (Creative Commons 0) https://freesound.org/people/Huminaatio/sounds/390462/
 Impact Sound - KeenanAXQuinn (Creative Commons 0) https://freesound.org/people/KeenanAXQuinn/sounds/586891/
+
+FONT Painting With Chocolate Regular - mooze (1001 Fonts Free For Commercial Use License) https://www.1001fonts.com/painting-with-chocolate-font.html

@@ -22,8 +22,10 @@
 
 #include "HitColliderComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 #include "Sound/SoundCue.h"
+#include "OffTheRecordGameModeBase.h"
 
 
 // Sets default values
@@ -36,7 +38,8 @@ ABaseCharacter::ABaseCharacter() :
 	bAttackButtonHeld(false), PowerUpCounter(100),
 	//Camera
 	bZoomCam(false), CurrentTargetLength(500.f), bDynamicRotation(false), CurrentPitch(-35.f), DefaultDynamicYaw(0.f), DynamicYawSpeed(2.f),
-	bDisableMovement(false)
+	bDisableMovement(false),
+	bGamePaused(false)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -89,8 +92,31 @@ void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	CurrentDynamicYaw = DefaultDynamicYaw;
+	OTRGameMode = Cast<AOffTheRecordGameModeBase>(UGameplayStatics::GetGameMode(this));
 	CameraControl->OnComponentBeginOverlap.AddDynamic(this, &ABaseCharacter::OnOverlap);
 	CameraControl->OnComponentEndOverlap.AddDynamic(this, &ABaseCharacter::OnEndOverlap);
+
+	if (StartingWeapon) {
+		StartWeapon = GetWorld()->SpawnActor<AActor>(StartingWeapon);
+		const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("Hand_RSocket"));
+		if (HandSocket)
+		{
+			HandSocket->AttachActor(StartWeapon, GetMesh());
+		}
+	}
+}
+
+void ABaseCharacter::Pause()
+{
+	if (bGamePaused) {
+		UGameplayStatics::SetGamePaused(GetWorld(), false);
+		bGamePaused = false;
+	}
+	else
+	{
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+		bGamePaused = true;
+	}
 }
 
 // Called every frame
@@ -120,6 +146,9 @@ void ABaseCharacter::SetupControls()
 		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("AttackSetup", EKeys::LeftMouseButton));
 		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("AttackSetup", EKeys::Gamepad_FaceButton_Left));
 
+		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Pause", EKeys::P));
+		UPlayerInput::AddEngineDefinedActionMapping(FInputActionKeyMapping("Pause", EKeys::P));
+
 		bindingsAdded = true;
 	}
 }
@@ -140,6 +169,9 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction("AttackSetup", IE_Pressed, this, &ABaseCharacter::AttackSetup);
 	PlayerInputComponent->BindAction("AttackSetup", IE_Released, this, &ABaseCharacter::AttackRelease);
+
+	FInputActionBinding& toggle = InputComponent->BindAction("Pause", IE_Pressed, this, &ABaseCharacter::Pause);
+	toggle.bExecuteWhenPaused = true;
 }
 
 
@@ -357,7 +389,6 @@ void ABaseCharacter::DisableAttackBox()
 
 void ABaseCharacter::KnockBack(FVector ForceDirection, FName Type, int32 PowerLvl)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Character Hit"));
 	GetWorldTimerManager().SetTimer(DisableCharacterTimer, this, &ABaseCharacter::Recover, .8f, false);
 	DisableCharacter(true);
 	PlayImpactSound();
@@ -370,10 +401,8 @@ void ABaseCharacter::KnockBack(FVector ForceDirection, FName Type, int32 PowerLv
 
 void ABaseCharacter::Recover()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Character Recover"));
 	if (GetWorldTimerManager().TimerExists(DisableCharacterTimer))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Timer was Run"));
 		GetWorldTimerManager().ClearTimer(DisableCharacterTimer);
 		DisableCharacterTimer.Invalidate();
 	}
@@ -393,7 +422,6 @@ void ABaseCharacter::DisableCharacter(bool disable)
 {
 	if (disable)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Character Disabled"));
 		SetCombatState(ECombatState::ECS_NOTREADY);
 		//GetController()->SetIgnoreMoveInput(true);
 		bDisableMovement = true;
@@ -402,7 +430,6 @@ void ABaseCharacter::DisableCharacter(bool disable)
 		DisableHitBoxes();
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Character Enabled"));
 		//GetController()->SetIgnoreMoveInput(false);
 		bDisableMovement = false;
 		GetCharacterMovement()->SetJumpAllowed(true);
@@ -416,7 +443,7 @@ void ABaseCharacter::DisableCharacter(bool disable)
 
 void ABaseCharacter::Death()
 {
-
+	OTRGameMode->SetLives(-1);
 	CameraLocation = CameraBoom->GetRelativeLocation();
 	DropWeapon();
 	FTimerHandle CharacterRespawnTimer;

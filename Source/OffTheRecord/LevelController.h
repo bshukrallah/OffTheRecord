@@ -16,6 +16,12 @@ class OFFTHERECORD_API ALevelController : public ALevelScriptActor
 public:
 	ALevelController();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LevelActors, meta = (AllowPrivateAccess = "true"))
+		class ASpawnController* SpawnComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LevelActors, meta = (AllowPrivateAccess = "true"))
+		class ABaseCharacter* BaseCharacter;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -25,6 +31,8 @@ private:
 
 
 public:
+	void SpawnEnemy();
 
+	class ABaseCharacter* GetCharacter();
 	
 };
