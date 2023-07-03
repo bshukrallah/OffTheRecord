@@ -7,8 +7,11 @@
 #include "BaseEnemyAnimInstance.h"
 #include "BaseEnemyAIController.h"
 
+
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+
+#include "Camera/CameraShakeBase.h"
 
 #include "OffTheRecordGameModeBase.h"
 #include "HitColliderComponent.h"
@@ -110,6 +113,10 @@ void ABaseEnemy::KnockBack(FVector ForceDirection, int32 PowerLvl)
 	PlayImpactSound();
 	DisableHitBoxes();
 	DisableAttackBoxes();
+	if (HitCameraShakeClass)
+	{
+		GetWorld()->GetFirstPlayerController()->ClientStartCameraShake(HitCameraShakeClass);
+	}
 	UBaseEnemyAnimInstance* AnimInstance = Cast<UBaseEnemyAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance) {
 		AnimInstance->Montage_Play(FallingMontage, 1.0);
@@ -131,6 +138,10 @@ void ABaseEnemy::BackGetUp()
 
 void ABaseEnemy::KnockForward(FVector ForceDirection, int32 PowerLvl)
 {
+	if (HitCameraShakeClass)
+	{
+		GetWorld()->GetFirstPlayerController()->ClientStartCameraShake(HitCameraShakeClass);
+	}
 	LaunchCharacter(FVector(ForceDirection.X * PowerLvl, ForceDirection.Y * PowerLvl, 300), false, false);
 	SetFallState(EHitState::EHS_FALLFORWARD);
 	PlayImpactSound();
@@ -151,6 +162,10 @@ void ABaseEnemy::FrontGetUp()
 
 void ABaseEnemy::KnockDown()
 {
+	if (HitCameraShakeClass)
+	{
+		GetWorld()->GetFirstPlayerController()->ClientStartCameraShake(HitCameraShakeClass);
+	}
 	SetFallState(EHitState::EHS_KNOCKEDDOWN);
 	DisableHitBoxes();
 	DisableAttackBoxes();

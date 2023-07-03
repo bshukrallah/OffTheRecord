@@ -48,7 +48,14 @@ void ABaseRecord::Tick(float DeltaTime)
 
 void ABaseRecord::SetRecordSpeed(int Increment)
 {
-	SpinValue += Increment;
+	if (SpinValue <= 210) {
+		SpinValue += Increment;
+	}
+}
+
+void ABaseRecord::ResetRecordSpeed()
+{
+	SpinValue = 20;
 }
 
 void ABaseRecord::GetMusicSelection()

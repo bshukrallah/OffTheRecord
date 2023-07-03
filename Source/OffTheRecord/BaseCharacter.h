@@ -123,6 +123,12 @@ private:
 
 	class AOffTheRecordGameModeBase* OTRGameMode;
 
+	UPROPERTY(EditAnywhere, Category = Combat)
+	TSubclassOf<class UCameraShakeBase> HitCameraShakeClass;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+		TSubclassOf<class UCameraShakeBase> DeathCameraShakeClass;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -180,6 +186,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void Respawn();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component Owner", meta = (AllowPrivateAccess = "true"))
+		class ABaseRecord* BaseRecord;
 
 	FVector CameraLocation;
 

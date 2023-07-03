@@ -5,6 +5,7 @@
 #include "BaseCharacterAnimInstance.h"
 #include "BaseWeapon.h"
 #include "BaseEnemy.h"
+#include "BaseRecord.h"
 
 #include "AttackTriggerComponent.h"
 
@@ -23,6 +24,8 @@
 #include "HitColliderComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+
+#include "Camera/CameraShakeBase.h"
 
 #include "Sound/SoundCue.h"
 #include "OffTheRecordGameModeBase.h"
@@ -396,6 +399,10 @@ void ABaseCharacter::KnockBack(FVector ForceDirection, FName Type, int32 PowerLv
 	UBaseCharacterAnimInstance* AnimInstance = Cast<UBaseCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 	AnimInstance->Montage_Play(FallingMontage, 1.5f);
 	AnimInstance->Montage_JumpToSection(FName(Type));
+	if (HitCameraShakeClass)
+	{
+		GetWorld()->GetFirstPlayerController()->ClientStartCameraShake(HitCameraShakeClass);
+	}
 
 }
 
@@ -449,13 +456,24 @@ void ABaseCharacter::Death()
 	FTimerHandle CharacterRespawnTimer;
 	GetWorldTimerManager().SetTimer(CharacterRespawnTimer, this, &ABaseCharacter::Respawn, 1.5f, false);
 	CameraBoom->CameraLagSpeed = .01f;
+	BaseRecord = Cast<ABaseRecord>(UGameplayStatics::GetActorOfClass(GetWorld(), ABaseRecord::StaticClass()));
+	if (BaseRecord)
+	{
+		BaseRecord->ResetRecordSpeed();
+	}
 }
 
 void ABaseCharacter::Respawn()
 {
+
 	Recover();
 	SetActorLocation(FVector(0.0f, 0.0f, 45.f));
 	CameraBoom->CameraLagSpeed = 2.0f;
+
+	if (DeathCameraShakeClass)
+	{
+		GetWorld()->GetFirstPlayerController()->ClientStartCameraShake(DeathCameraShakeClass);
+	}
 }
 
 void ABaseCharacter::PowerUpWeapon()

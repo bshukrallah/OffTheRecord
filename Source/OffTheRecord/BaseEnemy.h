@@ -79,6 +79,9 @@ private:
 
 	class AOffTheRecordGameModeBase* OTRGameMode;
 
+	UPROPERTY(EditAnywhere, Category = Combat)
+		TSubclassOf<class UCameraShakeBase> HitCameraShakeClass;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -156,9 +159,9 @@ public:
 
 	FORCEINLINE void EnableRightAttackBox() { RightAttackBox->EnableCollision(); }
 	FORCEINLINE void EnableLeftAttackBox() { LeftAttackBox->EnableCollision(); }
-	FORCEINLINE void EnableJumpAttackBox();
+	void EnableJumpAttackBox();
 
-	UWeaponSpawnComponent* GetWeaponSpawner();
+	class UWeaponSpawnComponent* GetWeaponSpawner();
 
 	void DisableChargeAttackBox();
 	void EnableChargeAttackBox();

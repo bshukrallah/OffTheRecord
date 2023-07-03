@@ -5,6 +5,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "StatusEnums.h"
 #include "BaseEnemy.h"
+#include "BaseEnemyAnimInstance.h"
 
 UBaseEnemyAnimInstance::UBaseEnemyAnimInstance() : Speed(0.f), KnockedBackwards(false), KnockedForwards(false), KnockedDown(false), bCharge(false)
 {
