@@ -78,3 +78,10 @@ Plugins/Developer/RiderLink/*
 
 #JetBrains
 .idea/*
+
+*.uasset
+*.jpg 
+*.fbx
+*.bmp
+*.wav
+*.mp3
